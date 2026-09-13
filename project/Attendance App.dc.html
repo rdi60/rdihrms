@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<template id="__bundler_thumbnail" data-bg-color="#f3f2f2">
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="120" height="120" fill="#f3f2f2"/>
+    <rect x="34" y="18" width="52" height="84" fill="#ffffff" stroke="#201e1d" stroke-width="3"/>
+    <rect x="42" y="30" width="36" height="8" fill="#ec3013"/>
+    <rect x="42" y="46" width="36" height="4" fill="#201e1d"/>
+    <rect x="42" y="56" width="24" height="4" fill="#201e1d"/>
+    <rect x="42" y="88" width="36" height="3" fill="#201e1d" opacity="0.4"/>
+  </svg>
+</template>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&amp;display=swap">
+<style>
+  body{margin:0}
+  *{box-sizing:border-box}
+  ::selection{background:rgba(236,48,19,0.3)}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#eae7e7;font-family:'Archivo',system-ui,sans-serif;padding:48px 20px">
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402,874">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f3f2f2;color:#201e1d;overflow:hidden">
+      <div style="flex:1;overflow:auto;padding-top:54px">
+
+        <sc-if value="{{ isOverlayNotifications }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 20px 28px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 16px">
+              <button onClick="{{ closeOverlay }}" style="display:flex;align-items:center;gap:6px;background:none;border:none;padding:0;font-family:'Archivo';font-weight:600;font-size:14px;color:#201e1d;cursor:pointer">
+                <span style="font-size:18px;display:flex">{{ icons.arrowLeft }}</span> Back
+              </button>
+            </div>
+            <h1 style="font-size:28px;margin:0 0 4px">Notifications</h1>
+            <div style="height:2px;background:rgba(32,30,29,0.4);margin:14px 0 20px"></div>
+
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">Today</div>
+            <sc-for list="{{ todayNotifs }}" as="n" hint-placeholder-count="2">
+              <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                <div style="width:34px;height:34px;flex:none;background:#eae7e7;display:flex;align-items:center;justify-content:center;color:#ae1800;font-size:16px">{{ n.icon }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:2px">{{ n.title }}</div>
+                  <div style="font-size:13px;color:#605d5d;line-height:1.4">{{ n.body }}</div>
+                  <div style="font-size:11px;color:#9b9797;margin-top:4px">{{ n.time }}</div>
+                </div>
+              </div>
+            </sc-for>
+
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#605d5d;margin:20px 0 8px">Earlier</div>
+            <sc-for list="{{ earlierNotifs }}" as="n" hint-placeholder-count="1">
+              <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                <div style="width:34px;height:34px;flex:none;background:#eae7e7;display:flex;align-items:center;justify-content:center;color:#605d5d;font-size:16px">{{ n.icon }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:2px">{{ n.title }}</div>
+                  <div style="font-size:13px;color:#605d5d;line-height:1.4">{{ n.body }}</div>
+                  <div style="font-size:11px;color:#9b9797;margin-top:4px">{{ n.time }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isOverlayHolidays }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 20px 28px">
+            <button onClick="{{ closeOverlay }}" style="display:flex;align-items:center;gap:6px;background:none;border:none;padding:10px 0 16px;font-family:'Archivo';font-weight:600;font-size:14px;color:#201e1d;cursor:pointer">
+              <span style="font-size:18px;display:flex">{{ icons.arrowLeft }}</span> Back
+            </button>
+            <h1 style="font-size:28px;margin:0 0 4px">Public holidays</h1>
+            <div style="height:2px;background:rgba(32,30,29,0.4);margin:14px 0 8px"></div>
+            <sc-for list="{{ holidays }}" as="h" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                <div style="width:44px;text-align:center;font-size:11px;font-weight:800;color:#ae1800;flex:none">{{ h.date }}</div>
+                <div style="flex:1;font-size:14px;font-weight:600">{{ h.name }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isOverlayAnniversaries }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 20px 28px">
+            <button onClick="{{ closeOverlay }}" style="display:flex;align-items:center;gap:6px;background:none;border:none;padding:10px 0 16px;font-family:'Archivo';font-weight:600;font-size:14px;color:#201e1d;cursor:pointer">
+              <span style="font-size:18px;display:flex">{{ icons.arrowLeft }}</span> Back
+            </button>
+            <h1 style="font-size:28px;margin:0 0 4px">Work anniversaries</h1>
+            <div style="height:2px;background:rgba(32,30,29,0.4);margin:14px 0 8px"></div>
+            <sc-for list="{{ anniversaries }}" as="a" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                <div style="width:44px;text-align:center;font-size:11px;font-weight:800;color:#ae1800;flex:none">{{ a.date }}</div>
+                <div style="flex:1">
+                  <div style="font-size:14px;font-weight:600">{{ a.name }}</div>
+                  <div style="font-size:12px;color:#605d5d">{{ a.years }} years</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isOverlayBirthdays }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 20px 28px">
+            <button onClick="{{ closeOverlay }}" style="display:flex;align-items:center;gap:6px;background:none;border:none;padding:10px 0 16px;font-family:'Archivo';font-weight:600;font-size:14px;color:#201e1d;cursor:pointer">
+              <span style="font-size:18px;display:flex">{{ icons.arrowLeft }}</span> Back
+            </button>
+            <h1 style="font-size:28px;margin:0 0 4px">Birthdays</h1>
+            <div style="height:2px;background:rgba(32,30,29,0.4);margin:14px 0 8px"></div>
+            <sc-for list="{{ birthdays }}" as="b" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                <div style="width:44px;text-align:center;font-size:11px;font-weight:800;color:#ae1800;flex:none">{{ b.date }}</div>
+                <div style="flex:1;font-size:14px;font-weight:600">{{ b.name }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isOverlayPayslips }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 20px 28px">
+            <button onClick="{{ closeOverlay }}" style="display:flex;align-items:center;gap:6px;background:none;border:none;padding:10px 0 16px;font-family:'Archivo';font-weight:600;font-size:14px;color:#201e1d;cursor:pointer">
+              <span style="font-size:18px;display:flex">{{ icons.arrowLeft }}</span> Back
+            </button>
+            <h1 style="font-size:28px;margin:0 0 4px">Payslips</h1>
+            <div style="height:2px;background:rgba(32,30,29,0.4);margin:14px 0 8px"></div>
+            <sc-for list="{{ payslips }}" as="p" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                <div style="flex:1">
+                  <div style="font-size:14px;font-weight:600">{{ p.month }}</div>
+                  <div style="font-size:12px;color:#605d5d">Net pay {{ p.net }}</div>
+                </div>
+                <button style="display:flex;align-items:center;gap:5px;background:none;border:1px solid rgba(32,30,29,0.4);padding:6px 10px;font-family:'Archivo';font-weight:700;font-size:11px;cursor:pointer">{{ icons.download }} PDF</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showMain }}" hint-placeholder-val="{{ true }}">
+
+          <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:0 20px 28px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+                <div>
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#ae1800;font-weight:600;margin-bottom:4px">Rajan Dental</div>
+                  <h1 style="font-size:30px;margin:0">Attendance</h1>
+                </div>
+                <button onClick="{{ openNotifications }}" style="position:relative;background:none;border:none;padding:6px;cursor:pointer;color:#201e1d;font-size:22px;display:flex">
+                  {{ icons.bell }}
+                  <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}">
+                    <span style="position:absolute;top:4px;right:4px;width:9px;height:9px;background:#ec3013;border:2px solid #f3f2f2"></span>
+                  </sc-if>
+                </button>
+              </div>
+
+              <div style="height:2px;background:rgba(32,30,29,0.4);margin:16px 0 20px"></div>
+
+              <div style="background:#eae9e9;padding:20px">
+                <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#ae1800;margin-bottom:6px">{{ clockKicker }}</div>
+                <div style="font-size:20px;font-weight:800;margin-bottom:16px">{{ clockStatusText }}</div>
+                <button onClick="{{ toggleClock }}" style="width:100%;display:flex;align-items:center;gap:10px;justify-content:flex-start;background:{{ clockBtnBg }};color:{{ clockBtnColor }};border:none;padding:14px 16px;font-family:'Archivo';font-weight:800;font-size:16px;cursor:pointer">
+                  <span style="font-size:20px;display:flex">{{ icons.clock }}</span>{{ clockBtnLabel }}
+                </button>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:16px;background:rgba(32,30,29,0.4)">
+                <div style="background:#f3f2f2;padding:16px">
+                  <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#605d5d;margin-bottom:6px">Scheduled shift</div>
+                  <div style="font-size:16px;font-weight:600">9:00–17:00</div>
+                </div>
+                <div style="background:#f3f2f2;padding:16px">
+                  <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#605d5d;margin-bottom:6px">This week</div>
+                  <div style="font-size:16px;font-weight:600">32.5h / 40h</div>
+                </div>
+              </div>
+
+              <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#605d5d;margin:24px 0 8px">Recent activity</div>
+              <sc-for list="{{ recentActivity }}" as="a" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                  <span style="font-size:16px;color:#605d5d;display:flex">{{ a.iconEl }}</span>
+                  <span style="flex:1;font-size:14px">{{ a.label }}</span>
+                  <span style="font-size:12px;color:#9b9797">{{ a.time }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:0 20px 28px">
+              <div style="padding-top:6px">
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#ae1800;font-weight:600;margin-bottom:4px">Overview</div>
+                <h1 style="font-size:28px;margin:0">History</h1>
+              </div>
+              <div style="height:2px;background:rgba(32,30,29,0.4);margin:16px 0 18px"></div>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <span style="font-family:'Archivo';font-weight:800;font-size:16px">September 2026</span>
+                <div style="display:flex;gap:4px">
+                  <button style="background:none;border:1px solid rgba(32,30,29,0.4);padding:4px 8px;cursor:pointer;color:#201e1d;display:flex">{{ icons.chevronLeft }}</button>
+                  <button style="background:none;border:1px solid rgba(32,30,29,0.4);padding:4px 8px;cursor:pointer;color:#201e1d;display:flex">{{ icons.chevronRight }}</button>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:#605d5d;margin-bottom:6px;text-align:center">
+                <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+                <sc-for list="{{ calendarDays }}" as="d" hint-placeholder-count="31">
+                  <sc-if value="{{ d.isBlank }}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
+                  <sc-if value="{{ d.isDay }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ d.onSelect }}" style="aspect-ratio:1;background:{{ d.bg }};color:{{ d.fg }};border:{{ d.border }};font-size:12px;font-weight:600;cursor:pointer;padding:0;font-family:'Archivo'">{{ d.day }}</button>
+                  </sc-if>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin:16px 0;font-size:11px;color:#605d5d">
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#eae9e9;display:inline-block"></span>Present</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#ffe0d9;display:inline-block"></span>Late</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:#ec3013;display:inline-block"></span>Absent</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;border:1.5px solid rgba(32,30,29,0.4);display:inline-block"></span>Leave</span>
+              </div>
+
+              <div style="height:2px;background:rgba(32,30,29,0.4);margin:4px 0 16px"></div>
+
+              <div style="background:#eae9e9;padding:16px">
+                <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#ae1800;margin-bottom:4px">{{ selectedDateLabel }}</div>
+                <div style="font-size:17px;font-weight:800;margin-bottom:10px">{{ selectedRecord.status }}</div>
+                <div style="display:flex;gap:24px;font-size:13px">
+                  <div><div style="color:#605d5d;font-size:11px;margin-bottom:2px">In</div>{{ selectedRecord.in }}</div>
+                  <div><div style="color:#605d5d;font-size:11px;margin-bottom:2px">Out</div>{{ selectedRecord.out }}</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isLeave }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:0 20px 28px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+                <div>
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#ae1800;font-weight:600;margin-bottom:4px">Time off</div>
+                  <h1 style="font-size:28px;margin:0">Leave</h1>
+                </div>
+                <button onClick="{{ openLeaveForm }}" style="display:flex;align-items:center;gap:5px;background:none;border:none;padding:6px 0;color:#ae1800;font-family:'Archivo';font-weight:800;font-size:13px;cursor:pointer">
+                  <span style="font-size:16px;display:flex">{{ icons.plus }}</span>New
+                </button>
+              </div>
+              <div style="height:2px;background:rgba(32,30,29,0.4);margin:16px 0 18px"></div>
+
+              <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">Balance</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:rgba(32,30,29,0.4);margin-bottom:18px">
+                <sc-for list="{{ leaveBalances }}" as="bal" hint-placeholder-count="4">
+                  <div style="background:#eae9e9;padding:12px 8px;text-align:center">
+                    <div style="font-size:11px;font-weight:800;color:#ae1800;margin-bottom:4px">{{ bal.code }}</div>
+                    <div style="font-size:14px;font-weight:800">{{ bal.avail }}<span style="font-size:11px;font-weight:400;color:#605d5d">/{{ bal.total }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ isManager }}" hint-placeholder-val="{{ false }}">
+                <div style="display:inline-flex;border:1px solid rgba(32,30,29,0.4);margin-bottom:18px">
+                  <button onClick="{{ selectLeaveViewMine }}" style="padding:7px 14px;font-size:13px;font-family:'Archivo';font-weight:600;border:none;cursor:pointer;background:{{ leaveMineBg }};color:{{ leaveMineColor }}">My requests</button>
+                  <button onClick="{{ selectLeaveViewApprovals }}" style="padding:7px 14px;font-size:13px;font-family:'Archivo';font-weight:600;border:none;border-left:1px solid rgba(32,30,29,0.4);cursor:pointer;background:{{ leaveApprovalsBg }};color:{{ leaveApprovalsColor }}">Approvals ({{ pendingCount }})</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ showLeaveForm }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#eae9e9;padding:18px;margin-bottom:18px">
+                  <div style="font-family:'Archivo';font-weight:800;font-size:15px;margin-bottom:14px">New request</div>
+                  <div style="display:inline-flex;border:1px solid rgba(32,30,29,0.4);margin-bottom:14px">
+                    <sc-for list="{{ leaveTypes }}" as="t" hint-placeholder-count="3">
+                      <button onClick="{{ t.onSelect }}" style="padding:6px 12px;font-size:12px;font-family:'Archivo';font-weight:600;border:none;cursor:pointer;background:{{ t.bg }};color:{{ t.color }};border-left:{{ t.borderLeft }}">{{ t.label }}</button>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ showDurationToggle }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:inline-flex;border:1px solid rgba(32,30,29,0.4);margin-bottom:12px">
+                      <button onClick="{{ selectFullDay }}" style="padding:6px 12px;font-size:12px;font-family:'Archivo';font-weight:600;border:none;cursor:pointer;background:{{ fullDayBg }};color:{{ fullDayColor }}">Full day</button>
+                      <button onClick="{{ selectHalfDay }}" style="padding:6px 12px;font-size:12px;font-family:'Archivo';font-weight:600;border:none;border-left:1px solid rgba(32,30,29,0.4);cursor:pointer;background:{{ halfDayBg }};color:{{ halfDayColor }}">Half day</button>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ showFullRange }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;gap:10px;margin-bottom:12px">
+                      <div style="flex:1">
+                        <label style="display:block;font-size:11px;color:#605d5d;margin-bottom:5px">Start</label>
+                        <input type="text" placeholder="Sep 20" value="{{ leaveStart }}" onChange="{{ onLeaveStartChange }}" style="width:100%;min-height:36px;padding:6px 10px;font-family:'Archivo';font-size:13px;background:#f3f2f2;border:1px solid rgba(32,30,29,0.4)">
+                      </div>
+                      <div style="flex:1">
+                        <label style="display:block;font-size:11px;color:#605d5d;margin-bottom:5px">End</label>
+                        <input type="text" placeholder="Sep 21" value="{{ leaveEnd }}" onChange="{{ onLeaveEndChange }}" style="width:100%;min-height:36px;padding:6px 10px;font-family:'Archivo';font-size:13px;background:#f3f2f2;border:1px solid rgba(32,30,29,0.4)">
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ showHalfDay }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-bottom:12px">
+                      <label style="display:block;font-size:11px;color:#605d5d;margin-bottom:5px">Date</label>
+                      <input type="text" placeholder="Sep 20" value="{{ leaveStart }}" onChange="{{ onLeaveStartChange }}" style="width:100%;min-height:36px;padding:6px 10px;font-family:'Archivo';font-size:13px;background:#f3f2f2;border:1px solid rgba(32,30,29,0.4);margin-bottom:10px">
+                      <div style="display:inline-flex;border:1px solid rgba(32,30,29,0.4)">
+                        <button onClick="{{ selectMorning }}" style="padding:6px 12px;font-size:12px;font-family:'Archivo';font-weight:600;border:none;cursor:pointer;background:{{ morningBg }};color:{{ morningColor }}">Morning</button>
+                        <button onClick="{{ selectAfternoon }}" style="padding:6px 12px;font-size:12px;font-family:'Archivo';font-weight:600;border:none;border-left:1px solid rgba(32,30,29,0.4);cursor:pointer;background:{{ afternoonBg }};color:{{ afternoonColor }}">Afternoon</button>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ showPermissionFields }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-bottom:12px">
+                      <label style="display:block;font-size:11px;color:#605d5d;margin-bottom:5px">Date</label>
+                      <input type="text" placeholder="Sep 20" value="{{ leaveStart }}" onChange="{{ onLeaveStartChange }}" style="width:100%;min-height:36px;padding:6px 10px;font-family:'Archivo';font-size:13px;background:#f3f2f2;border:1px solid rgba(32,30,29,0.4);margin-bottom:10px">
+                      <div style="display:flex;gap:10px">
+                        <div style="flex:1">
+                          <label style="display:block;font-size:11px;color:#605d5d;margin-bottom:5px">From</label>
+                          <input type="text" placeholder="10:00 AM" value="{{ permissionFrom }}" onChange="{{ onPermissionFromChange }}" style="width:100%;min-height:36px;padding:6px 10px;font-family:'Archivo';font-size:13px;background:#f3f2f2;border:1px solid rgba(32,30,29,0.4)">
+                        </div>
+                        <div style="flex:1">
+                          <label style="display:block;font-size:11px;color:#605d5d;margin-bottom:5px">To</label>
+                          <input type="text" placeholder="11:30 AM" value="{{ permissionTo }}" onChange="{{ onPermissionToChange }}" style="width:100%;min-height:36px;padding:6px 10px;font-family:'Archivo';font-size:13px;background:#f3f2f2;border:1px solid rgba(32,30,29,0.4)">
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <label style="display:block;font-size:11px;color:#605d5d;margin-bottom:5px">Reason</label>
+                  <textarea placeholder="Brief reason" value="{{ leaveReason }}" onChange="{{ onLeaveReasonChange }}" style="width:100%;min-height:64px;padding:8px 10px;font-family:'Archivo';font-size:13px;background:#f3f2f2;border:1px solid rgba(32,30,29,0.4);resize:vertical;margin-bottom:14px"></textarea>
+                  <div style="display:flex;gap:10px">
+                    <button onClick="{{ submitLeave }}" style="flex:1;background:#ec3013;color:#f3f2f2;border:none;padding:11px 14px;font-family:'Archivo';font-weight:800;font-size:14px;cursor:pointer;text-align:left">Submit</button>
+                    <button onClick="{{ closeLeaveForm }}" style="background:none;border:1px solid rgba(32,30,29,0.4);padding:11px 14px;font-family:'Archivo';font-weight:600;font-size:14px;cursor:pointer">Cancel</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ showMineList }}" hint-placeholder-val="{{ true }}">
+                <sc-for list="{{ myLeaveRequests }}" as="r" hint-placeholder-count="2">
+                  <div style="padding:14px 0;border-bottom:1px solid rgba(32,30,29,0.4);display:flex;align-items:center;gap:12px">
+                    <div style="flex:1">
+                      <div style="font-weight:600;font-size:14px;margin-bottom:3px">{{ r.type }} leave</div>
+                      <div style="font-size:12px;color:#605d5d">{{ r.start }} – {{ r.end }}</div>
+                    </div>
+                    <span style="font-size:11px;font-weight:600;padding:4px 10px;background:{{ r.tagBg }};color:{{ r.tagColor }}">{{ r.status }}</span>
+                  </div>
+                </sc-for>
+              </sc-if>
+
+              <sc-if value="{{ showApprovalsList }}" hint-placeholder-val="{{ false }}">
+                <sc-for list="{{ pendingApprovals }}" as="p" hint-placeholder-count="2">
+                  <div style="padding:14px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                      <div style="font-weight:600;font-size:14px">{{ p.name }}</div>
+                      <span style="font-size:11px;color:#605d5d">{{ p.type }}</span>
+                    </div>
+                    <div style="font-size:12px;color:#605d5d;margin-bottom:2px">{{ p.start }} – {{ p.end }}</div>
+                    <div style="font-size:13px;color:#201e1d;margin-bottom:10px">{{ p.reason }}</div>
+                    <div style="display:flex;gap:8px">
+                      <button onClick="{{ p.onApprove }}" style="flex:1;background:#201e1d;color:#f3f2f2;border:none;padding:8px 10px;font-family:'Archivo';font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px">{{ icons.check }} Approve</button>
+                      <button onClick="{{ p.onReject }}" style="flex:1;background:none;border:1px solid rgba(32,30,29,0.4);padding:8px 10px;font-family:'Archivo';font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px">{{ icons.x }} Reject</button>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ noPending }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:24px 0;text-align:center;color:#9b9797;font-size:13px">No pending requests.</div>
+                </sc-if>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:0 20px 28px">
+              <div style="padding-top:6px">
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#ae1800;font-weight:600;margin-bottom:4px">Manager</div>
+                <h1 style="font-size:28px;margin:0">Team</h1>
+              </div>
+              <div style="height:2px;background:rgba(32,30,29,0.4);margin:16px 0 18px"></div>
+
+              <div style="display:inline-flex;border:1px solid rgba(32,30,29,0.4);margin-bottom:18px">
+                <button onClick="{{ selectTeamRoster }}" style="padding:7px 14px;font-size:13px;font-family:'Archivo';font-weight:600;border:none;cursor:pointer;background:{{ rosterTabBg }};color:{{ rosterTabColor }}">Roster</button>
+                <button onClick="{{ selectTeamAnalytics }}" style="padding:7px 14px;font-size:13px;font-family:'Archivo';font-weight:600;border:none;border-left:1px solid rgba(32,30,29,0.4);cursor:pointer;background:{{ analyticsTabBg }};color:{{ analyticsTabColor }}">Analytics</button>
+              </div>
+
+              <sc-if value="{{ showRoster }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;gap:8px;border:1px solid rgba(32,30,29,0.4);padding:8px 10px;margin-bottom:14px">
+                  <span style="font-size:15px;color:#605d5d;display:flex">{{ icons.search }}</span>
+                  <input type="text" placeholder="Search staff" value="{{ rosterQuery }}" onChange="{{ onRosterQueryChange }}" style="flex:1;border:none;background:none;font-family:'Archivo';font-size:13px;outline:none">
+                </div>
+                <sc-for list="{{ filteredRoster }}" as="m" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                    <div style="width:34px;height:34px;flex:none;background:#eae9e9;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#605d5d">{{ m.initials }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-weight:600;font-size:14px">{{ m.name }}</div>
+                      <div style="font-size:12px;color:#605d5d">{{ m.role }}</div>
+                    </div>
+                    <div style="text-align:right">
+                      <span style="display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;background:{{ m.tagBg }};color:{{ m.tagColor }};margin-bottom:3px">{{ m.status }}</span>
+                      <div style="font-size:11px;color:#9b9797">{{ m.inTime }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </sc-if>
+
+              <sc-if value="{{ showAnalytics }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:rgba(32,30,29,0.4);margin-bottom:18px">
+                  <div style="background:#f3f2f2;padding:16px">
+                    <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#605d5d;margin-bottom:6px">Attendance rate</div>
+                    <div style="font-size:24px;font-weight:800">94%</div>
+                  </div>
+                  <div style="background:#f3f2f2;padding:16px">
+                    <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#605d5d;margin-bottom:6px">On-time rate</div>
+                    <div style="font-size:24px;font-weight:800">88%</div>
+                  </div>
+                  <div style="background:#f3f2f2;padding:16px">
+                    <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#605d5d;margin-bottom:6px">Avg. late by</div>
+                    <div style="font-size:24px;font-weight:800">12 min</div>
+                  </div>
+                  <div style="background:#f3f2f2;padding:16px">
+                    <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#605d5d;margin-bottom:6px">Open leave</div>
+                    <div style="font-size:24px;font-weight:800">{{ pendingCount }}</div>
+                  </div>
+                </div>
+
+                <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#605d5d;margin-bottom:10px">This week</div>
+                <div style="display:flex;align-items:flex-end;gap:8px;height:110px;margin-bottom:6px">
+                  <sc-for list="{{ weekBars }}" as="w" hint-placeholder-count="7">
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:6px">
+                      <div style="width:100%;background:#ec3013;height:{{ w.pct }}%"></div>
+                      <span style="font-size:10px;color:#605d5d">{{ w.day }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:0 20px 28px">
+              <div style="padding-top:6px">
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#ae1800;font-weight:600;margin-bottom:4px">Account</div>
+                <h1 style="font-size:28px;margin:0">Profile</h1>
+              </div>
+              <div style="height:2px;background:rgba(32,30,29,0.4);margin:16px 0 20px"></div>
+
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+                <div style="width:56px;height:56px;flex:none;background:#eae9e9;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#605d5d">{{ userInitials }}</div>
+                <div>
+                  <div style="font-weight:800;font-size:18px">{{ userName }}</div>
+                  <div style="font-size:13px;color:#605d5d">{{ userRoleLabel }} · Employee #{{ userId }}</div>
+                </div>
+              </div>
+
+              <div style="background:#eae9e9;padding:16px;margin-bottom:18px">
+                <div style="font-family:'Archivo';font-weight:800;font-size:14px;margin-bottom:4px">App view</div>
+                <div style="font-size:12px;color:#605d5d;margin-bottom:12px">Switch between staff and manager tools</div>
+                <div style="display:inline-flex;border:1px solid rgba(32,30,29,0.4)">
+                  <button onClick="{{ selectRoleStaff }}" style="padding:7px 14px;font-size:13px;font-family:'Archivo';font-weight:600;border:none;cursor:pointer;background:{{ roleStaffBg }};color:{{ roleStaffColor }}">Staff</button>
+                  <button onClick="{{ selectRoleManager }}" style="padding:7px 14px;font-size:13px;font-family:'Archivo';font-weight:600;border:none;border-left:1px solid rgba(32,30,29,0.4);cursor:pointer;background:{{ roleManagerBg }};color:{{ roleManagerColor }}">Manager</button>
+                </div>
+              </div>
+
+              <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#605d5d;margin:20px 0 8px">Company</div>
+              <sc-for list="{{ companyItems }}" as="c" hint-placeholder-count="4">
+                <button onClick="{{ c.onOpen }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,0.4);background:none;border-left:none;border-right:none;border-top:none;cursor:pointer;font-family:'Archivo';text-align:left">
+                  <span style="font-size:16px;color:#605d5d;display:flex">{{ c.icon }}</span>
+                  <span style="flex:1;font-size:14px;color:#201e1d">{{ c.label }}</span>
+                  <span style="font-size:14px;color:#9b9797;display:flex">{{ icons.chevronRight }}</span>
+                </button>
+              </sc-for>
+
+              <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#605d5d;margin:20px 0 8px">Settings</div>
+              <sc-for list="{{ settingsItems }}" as="s" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,0.4)">
+                  <span style="font-size:16px;color:#605d5d;display:flex">{{ s.icon }}</span>
+                  <span style="flex:1;font-size:14px">{{ s.label }}</span>
+                  <span style="font-size:14px;color:#9b9797;display:flex">{{ icons.chevronRight }}</span>
+                </div>
+              </sc-for>
+
+              <button style="width:100%;display:flex;align-items:center;gap:8px;justify-content:flex-start;background:none;border:1px solid rgba(32,30,29,0.4);padding:12px 14px;font-family:'Archivo';font-weight:700;font-size:14px;color:#ae1800;cursor:pointer;margin-top:20px">
+                <span style="font-size:16px;display:flex">{{ icons.logOut }}</span>Log out
+              </button>
+            </div>
+          </sc-if>
+
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ showTabBar }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;border-top:2px solid rgba(32,30,29,0.4);background:#f3f2f2;padding-bottom:20px">
+          <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="4">
+            <button onClick="{{ tab.onSelect }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;padding:9px 2px 0;cursor:pointer;color:{{ tab.color }}">
+              <span style="font-size:19px;display:flex">{{ tab.icon }}</span>
+              <span style="font-size:10px;font-weight:600;letter-spacing:0.01em">{{ tab.label }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+function I(kids, vb) {
+  return React.createElement('svg', { viewBox: vb || '0 0 24 24', width: '1em', height: '1em', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', style: { display: 'block' } }, kids);
+}
+function line(x1,y1,x2,y2,k){ return React.createElement('line',{key:k,x1,y1,x2,y2}); }
+function circ(cx,cy,r,k){ return React.createElement('circle',{key:k,cx,cy,r}); }
+function path(d,k){ return React.createElement('path',{key:k,d}); }
+function rect(x,y,w,h,k){ return React.createElement('rect',{key:k,x,y,width:w,height:h}); }
+
+const ICON_DEFS = {
+  home: () => I([path('M4 11 12 4l8 7','a'), path('M6 10v9h12v-9','b')]),
+  clock: () => I([circ(12,12,9,'a'), path('M12 7v5l3 3','b')]),
+  calendar: () => I([rect(3,5,18,16,'a'), line(3,10,21,10,'b'), line(8,3,8,7,'c'), line(16,3,16,7,'d')]),
+  clipboard: () => I([rect(5,4,14,17,'a'), rect(9,2,6,4,'b'), line(8,11,16,11,'c'), line(8,15,13,15,'d')]),
+  users: () => I([circ(9,8,3.2,'a'), path('M3 20c0-3.2 2.7-5.5 6-5.5s6 2.3 6 5.5','b'), circ(17,9,2.2,'c'), path('M17.5 12.2c2.3.5 3.5 2.4 3.5 4.8','d')]),
+  user: () => I([circ(12,8,3.6,'a'), path('M5 20c0-3.6 3-6 7-6s7 2.4 7 6','b')]),
+  bell: () => I([path('M6 10a6 6 0 0112 0c0 3 1 5 2 6H4c1-1 2-3 2-6Z','a'), path('M10 20a2 2 0 004 0','b')]),
+  chevronRight: () => I([path('M9 5l7 7-7 7','a')]),
+  chevronLeft: () => I([path('M15 5l-7 7 7 7','a')]),
+  check: () => I([path('M5 13l4 4 10-10','a')]),
+  x: () => I([line(5,5,19,19,'a'), line(19,5,5,19,'b')]),
+  plus: () => I([line(12,4,12,20,'a'), line(4,12,20,12,'b')]),
+  arrowLeft: () => I([line(20,12,4,12,'a'), path('M10 6l-6 6 6 6','b')]),
+  barChart: () => I([rect(4,12,4,8,'a'), rect(10,7,4,13,'b'), rect(16,3,4,17,'c')]),
+  logOut: () => I([rect(4,4,10,16,'a'), path('M20 12H10','b'), path('M16 8l4 4-4 4','c')]),
+  search: () => I([circ(10,10,7,'a'), line(20,20,15,15,'b')]),
+  download: () => I([path('M12 3v12','a'), path('M7 11l5 5 5-5','b'), line(4,21,20,21,'c')]),
+  gift: () => I([rect(4,10,16,10,'a'), rect(4,7,16,3,'b'), line(12,7,12,20,'c'), path('M12 7C10 4 6 5 6 7.5S9 9 12 7Z','d'), path('M12 7c2-3 6-2 6 .5S15 9 12 7Z','e')]),
+  award: () => I([circ(12,9,5.5,'a'), path('M8 14l-2 7 6-3 6 3-2-7','b')]),
+  alertTriangle: () => I([path('M12 4 2 20h20L12 4Z','a'), line(12,10,12,15,'b'), circ(12,18,0.5,'c')]),
+  checkCircle: () => I([circ(12,12,9,'a'), path('M8 12l3 3 5-6','b')]),
+  settings: () => I([circ(12,12,3,'a'), path('M4 12h2M18 12h2M12 4v2M12 18v2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4','b')]),
+  lock: () => I([rect(5,11,14,9,'a'), path('M8 11V7a4 4 0 018 0v4','b')]),
+  globe: () => I([circ(12,12,9,'a'), line(3,12,21,12,'b'), path('M12 3c2.5 2.5 3.5 6 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-6-3.5-9s1-6.5 3.5-9Z','c')]),
+  help: () => I([circ(12,12,9,'a'), path('M9.5 9.5a2.5 2.5 0 115 0c0 1.5-2.5 2-2.5 4','b'), circ(12,17,0.5,'c')]),
+};
+function icon(name){ return ICON_DEFS[name](); }
+
+const ROSTER = [
+  { name: 'Meera Nair', role: 'Hygienist', status: 'Present', inTime: '8:58 AM' },
+  { name: 'Arjun Dev', role: 'Dental Assistant', status: 'Late', inTime: '9:24 AM' },
+  { name: 'Priya Suresh', role: 'Receptionist', status: 'Present', inTime: '8:45 AM' },
+  { name: 'Karthik Iyer', role: 'Associate Dentist', status: 'On leave', inTime: '—' },
+  { name: 'Divya Menon', role: 'Hygienist', status: 'Absent', inTime: '—' },
+];
+const DAY_OVERRIDES = { 2: 'leave', 5: 'late', 12: 'absent', 19: 'late' };
+const DAY_DETAIL = {
+  2: { status: 'On leave', in: '—', out: '—' },
+  5: { status: 'Late', in: '9:18 AM', out: '5:00 PM' },
+  12: { status: 'Absent', in: '—', out: '—' },
+  19: { status: 'Late', in: '9:22 AM', out: '5:04 PM' },
+};
+const LEAVE_BALANCES = [
+  { code: 'SL', avail: 5, total: 12 },
+  { code: 'CL', avail: 3, total: 12 },
+  { code: 'EL', avail: 8, total: 15 },
+  { code: 'Perm.', avail: 2, total: 4 },
+];
+const HOLIDAYS = [
+  { date: 'Oct 2', name: 'Gandhi Jayanti' },
+  { date: 'Oct 20', name: 'Diwali' },
+  { date: 'Nov 8', name: 'Guru Nanak Jayanti' },
+  { date: 'Dec 25', name: 'Christmas' },
+  { date: 'Jan 1', name: "New Year's Day" },
+  { date: 'Jan 26', name: 'Republic Day' },
+];
+const ANNIVERSARIES = [
+  { name: 'Priya Suresh', years: 3, date: 'Sep 22' },
+  { name: 'Karthik Iyer', years: 5, date: 'Oct 4' },
+];
+const BIRTHDAYS = [
+  { name: 'Divya Menon', date: 'Sep 16' },
+  { name: 'Arjun Dev', date: 'Oct 1' },
+];
+const PAYSLIPS = [
+  { month: 'August 2026', net: '₹48,200' },
+  { month: 'July 2026', net: '₹48,200' },
+  { month: 'June 2026', net: '₹47,800' },
+];
+
+class Component extends DCLogic {
+  state = {
+    role: 'manager',
+    activeTab: 'home',
+    overlay: null,
+    notifRead: false,
+    clockedIn: false,
+    clockInAt: null,
+    recentActivity: [
+      { label: 'Clocked out', time: 'Yesterday, 5:31 PM', iconName: 'logOut' },
+      { label: 'Clocked in', time: 'Yesterday, 9:04 AM', iconName: 'clock' },
+      { label: 'Leave approved', time: '2 days ago', iconName: 'checkCircle' },
+    ],
+    selectedDay: 19,
+    leaveView: 'mine',
+    showLeaveForm: false,
+    leaveType: 'SL',
+    leaveDuration: 'Full day',
+    halfSession: 'Morning',
+    leaveStart: '',
+    leaveEnd: '',
+    leaveReason: '',
+    permissionFrom: '',
+    permissionTo: '',
+    myLeaveRequests: [
+      { id: 1, type: 'SL', start: 'Sep 2', end: 'Sep 2', status: 'Approved' },
+      { id: 2, type: 'CL', start: 'Aug 18', end: 'Aug 19', status: 'Approved' },
+    ],
+    teamLeaveRequests: [
+      { id: 101, name: 'Meera Nair', type: 'CL', start: 'Sep 18', end: 'Sep 19', reason: 'Family function', status: 'Pending' },
+      { id: 102, name: 'Arjun Dev', type: 'SL', start: 'Sep 15', end: 'Sep 15', reason: 'Fever', status: 'Pending' },
+    ],
+    teamView: 'roster',
+    rosterQuery: '',
+    notifications: [
+      { id: 1, title: 'Leave approved', body: 'Your Sep 2 sick leave was approved', time: '2h ago', group: 'Today', iconName: 'checkCircle' },
+      { id: 2, title: 'Late check-in', body: 'Arjun Dev checked in at 9:24 AM (24 min late)', time: '3h ago', group: 'Today', iconName: 'alertTriangle' },
+      { id: 3, title: 'New leave request', body: 'Meera Nair requested leave, Sep 18–19', time: '5h ago', group: 'Today', iconName: 'clipboard' },
+      { id: 4, title: 'Shift reminder', body: 'Your shift starts tomorrow at 9:00 AM', time: 'Yesterday', group: 'Earlier', iconName: 'clock' },
+    ],
+  };
+
+  setTab = (id) => this.setState({ activeTab: id, showLeaveForm: false });
+  openNotifications = () => this.setState({ overlay: 'notifications', notifRead: true });
+  closeNotifications = () => this.setState({ overlay: null });
+  openOverlay = (name) => this.setState({ overlay: name });
+  closeOverlay = () => this.setState({ overlay: null });
+
+  toggleClock = () => {
+    if (this.state.clockedIn) {
+      this.setState((s) => ({
+        clockedIn: false,
+        recentActivity: [{ label: 'Clocked out', time: 'Just now', iconName: 'logOut' }, ...s.recentActivity],
+      }));
+    } else {
+      const now = new Date();
+      this.setState((s) => ({
+        clockedIn: true,
+        clockInAt: now,
+        recentActivity: [{ label: 'Clocked in', time: 'Just now', iconName: 'clock' }, ...s.recentActivity],
+      }));
+    }
+  };
+
+  selectDay = (day) => this.setState({ selectedDay: day });
+  openLeaveForm = () => this.setState({ showLeaveForm: true });
+  closeLeaveForm = () => this.setState({ showLeaveForm: false });
+  setLeaveView = (v) => this.setState({ leaveView: v });
+  setLeaveType = (t) => this.setState({ leaveType: t, leaveDuration: 'Full day' });
+  setLeaveDuration = (d) => this.setState({ leaveDuration: d });
+  setHalfSession = (s) => this.setState({ halfSession: s });
+  onLeaveStartChange = (e) => this.setState({ leaveStart: e.target.value });
+  onLeaveEndChange = (e) => this.setState({ leaveEnd: e.target.value });
+  onLeaveReasonChange = (e) => this.setState({ leaveReason: e.target.value });
+  onPermissionFromChange = (e) => this.setState({ permissionFrom: e.target.value });
+  onPermissionToChange = (e) => this.setState({ permissionTo: e.target.value });
+  submitLeave = () => {
+    const { leaveType, leaveStart, leaveEnd, leaveDuration, halfSession, permissionFrom, permissionTo } = this.state;
+    if (!leaveStart) return;
+    let label = leaveType, endLabel = leaveEnd || leaveStart;
+    if (leaveType === 'Permission') {
+      if (!permissionFrom || !permissionTo) return;
+      endLabel = `${permissionFrom}–${permissionTo}`;
+    } else if (leaveDuration === 'Half day') {
+      endLabel = halfSession;
+    } else if (!leaveEnd) return;
+    this.setState((s) => ({
+      myLeaveRequests: [{ id: Date.now(), type: label, start: leaveStart, end: endLabel, status: 'Pending' }, ...s.myLeaveRequests],
+      showLeaveForm: false, leaveStart: '', leaveEnd: '', leaveReason: '', permissionFrom: '', permissionTo: '',
+    }));
+  };
+  decideLeave = (id, status) => this.setState((s) => ({
+    teamLeaveRequests: s.teamLeaveRequests.map((r) => (r.id === id ? { ...r, status } : r)),
+  }));
+  setTeamView = (v) => this.setState({ teamView: v });
+  onRosterQueryChange = (e) => this.setState({ rosterQuery: e.target.value });
+  setRole = (r) => this.setState({ role: r, activeTab: r === 'staff' && this.state.activeTab === 'team' ? 'home' : this.state.activeTab });
+
+  renderVals() {
+    const s = this.state;
+    const accent = '#ec3013', accent100 = '#fff2ef', accent200 = '#ffe0d9', accent700 = '#ae1800', accent800 = '#7c1405';
+    const ink = '#201e1d', bg = '#f3f2f2', surface = '#eae9e9', muted = '#605d5d', mutedLight = '#9b9797', divider = 'rgba(32,30,29,0.4)';
+
+    const icons = {};
+    Object.keys(ICON_DEFS).forEach((k) => { icons[k] = icon(k); });
+
+    const isManager = s.role === 'manager';
+    const tabDefs = [
+      { id: 'home', label: 'Home', iconName: 'home' },
+      { id: 'history', label: 'History', iconName: 'calendar' },
+      { id: 'leave', label: 'Leave', iconName: 'clipboard' },
+      ...(isManager ? [{ id: 'team', label: 'Team', iconName: 'users' }] : []),
+      { id: 'profile', label: 'Profile', iconName: 'user' },
+    ];
+    const tabs = tabDefs.map((t) => ({
+      label: t.label,
+      icon: icon(t.iconName),
+      color: s.activeTab === t.id ? accent700 : muted,
+      onSelect: () => this.setTab(t.id),
+    }));
+
+    const clockInLabel = s.clockInAt ? s.clockInAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
+
+    const recentActivity = s.recentActivity.map((a) => ({ ...a, iconEl: icon(a.iconName) }));
+
+    const calendarDays = [];
+    for (let i = 0; i < 1; i++) calendarDays.push({ isBlank: true });
+    for (let day = 1; day <= 30; day++) {
+      const wd = day % 7;
+      const isWeekend = wd === 5 || wd === 6;
+      const status = DAY_OVERRIDES[day] || (isWeekend ? 'off' : 'present');
+      let bgc = surface, fg = ink, border = '1px solid transparent';
+      if (status === 'late') { bgc = accent200; fg = accent800; }
+      else if (status === 'absent') { bgc = accent; fg = bg; }
+      else if (status === 'leave') { bgc = bg; fg = ink; border = `1.5px solid ${divider}`; }
+      else if (status === 'off') { bgc = 'transparent'; fg = mutedLight; }
+      if (day === s.selectedDay) border = `2px solid ${accent700}`;
+      calendarDays.push({ isDay: true, day, bg: bgc, fg, border, onSelect: () => this.selectDay(day) });
+    }
+    const detail = DAY_DETAIL[s.selectedDay] || { status: 'Present', in: '8:58 AM', out: '5:02 PM' };
+
+    const tagStyle = (status) => {
+      if (status === 'Approved' || status === 'Present') return { tagBg: '#f8f4f4', tagColor: '#444141' };
+      if (status === 'Pending' || status === 'Late') return { tagBg: accent100, tagColor: accent800 };
+      if (status === 'Rejected' || status === 'Absent') return { tagBg: accent200, tagColor: accent700 };
+      return { tagBg: '#eae7e7', tagColor: muted };
+    };
+
+    const myLeaveRequests = s.myLeaveRequests.map((r) => ({ ...r, ...tagStyle(r.status) }));
+    const pendingApprovals = s.teamLeaveRequests.filter((r) => r.status === 'Pending').map((p) => ({
+      ...p, onApprove: () => this.decideLeave(p.id, 'Approved'), onReject: () => this.decideLeave(p.id, 'Rejected'),
+    }));
+
+    const leaveTypes = ['SL', 'CL', 'EL', 'Permission'].map((t, i) => ({
+      label: t, onSelect: () => this.setLeaveType(t),
+      bg: s.leaveType === t ? accent : 'transparent', color: s.leaveType === t ? bg : ink,
+      borderLeft: i > 0 ? `1px solid ${divider}` : 'none',
+    }));
+
+    const q = s.rosterQuery.trim().toLowerCase();
+    const filteredRoster = ROSTER.filter((m) => m.name.toLowerCase().includes(q)).map((m) => ({
+      ...m, initials: m.name.split(' ').map((p) => p[0]).join(''),
+      ...(() => { const t = tagStyle(m.status); return { tagBg: t.tagBg, tagColor: t.tagColor }; })(),
+    }));
+
+    const weekBars = [
+      { day: 'Mon', pct: 96 }, { day: 'Tue', pct: 90 }, { day: 'Wed', pct: 100 },
+      { day: 'Thu', pct: 84 }, { day: 'Fri', pct: 92 }, { day: 'Sat', pct: 70 }, { day: 'Sun', pct: 0 },
+    ];
+
+    const settingsItems = [
+      { label: 'Notifications', icon: icon('bell') },
+      { label: 'Change password', icon: icon('lock') },
+      { label: 'Language', icon: icon('globe') },
+      { label: 'Help & support', icon: icon('help') },
+    ];
+    const companyItems = [
+      { label: 'Public holidays', icon: icon('calendar'), onOpen: () => this.openOverlay('holidays') },
+      { label: 'Work anniversaries', icon: icon('award'), onOpen: () => this.openOverlay('anniversaries') },
+      { label: 'Birthdays', icon: icon('gift'), onOpen: () => this.openOverlay('birthdays') },
+      { label: 'Payslips', icon: icon('download'), onOpen: () => this.openOverlay('payslips') },
+    ];
+
+    const hasUnread = !s.notifRead;
+    const todayNotifs = s.notifications.filter((n) => n.group === 'Today').map((n) => ({ ...n, icon: icon(n.iconName) }));
+    const earlierNotifs = s.notifications.filter((n) => n.group === 'Earlier').map((n) => ({ ...n, icon: icon(n.iconName) }));
+
+    const showFullDayType = s.leaveType !== 'Permission';
+    const isHalf = s.leaveDuration === 'Half day';
+
+    return {
+      icons,
+      isOverlayNotifications: s.overlay === 'notifications',
+      isOverlayHolidays: s.overlay === 'holidays',
+      isOverlayAnniversaries: s.overlay === 'anniversaries',
+      isOverlayBirthdays: s.overlay === 'birthdays',
+      isOverlayPayslips: s.overlay === 'payslips',
+      showMain: !s.overlay,
+      showTabBar: !s.overlay,
+      closeNotifications: this.closeNotifications,
+      closeOverlay: this.closeOverlay,
+      openNotifications: this.openNotifications,
+      hasUnread,
+      todayNotifs, earlierNotifs,
+      holidays: HOLIDAYS, anniversaries: ANNIVERSARIES, birthdays: BIRTHDAYS, payslips: PAYSLIPS,
+      leaveBalances: LEAVE_BALANCES,
+      tabs,
+      isHome: s.activeTab === 'home',
+      isHistory: s.activeTab === 'history',
+      isLeave: s.activeTab === 'leave',
+      isTeam: s.activeTab === 'team' && isManager,
+      isProfile: s.activeTab === 'profile',
+      isManager,
+
+      clockKicker: s.clockedIn ? 'On the clock' : 'Not clocked in',
+      clockStatusText: s.clockedIn ? `Since ${clockInLabel}` : 'Ready when you are',
+      clockBtnLabel: s.clockedIn ? 'Clock out' : 'Clock in',
+      clockBtnBg: s.clockedIn ? '#201e1d' : accent,
+      clockBtnColor: bg,
+      toggleClock: this.toggleClock,
+      recentActivity,
+
+      calendarDays,
+      selectedDateLabel: `September ${s.selectedDay}, 2026`,
+      selectedRecord: detail,
+
+      leaveMineBg: s.leaveView === 'mine' ? accent : 'transparent',
+      leaveMineColor: s.leaveView === 'mine' ? bg : ink,
+      leaveApprovalsBg: s.leaveView === 'approvals' ? accent : 'transparent',
+      leaveApprovalsColor: s.leaveView === 'approvals' ? bg : ink,
+      selectLeaveViewMine: () => this.setLeaveView('mine'),
+      selectLeaveViewApprovals: () => this.setLeaveView('approvals'),
+      pendingCount: pendingApprovals.length,
+      showLeaveForm: s.showLeaveForm,
+      openLeaveForm: this.openLeaveForm,
+      closeLeaveForm: this.closeLeaveForm,
+      leaveTypes,
+      leaveStart: s.leaveStart, leaveEnd: s.leaveEnd, leaveReason: s.leaveReason,
+      onLeaveStartChange: this.onLeaveStartChange, onLeaveEndChange: this.onLeaveEndChange, onLeaveReasonChange: this.onLeaveReasonChange,
+      submitLeave: this.submitLeave,
+      showDurationToggle: showFullDayType,
+      showFullRange: showFullDayType && !isHalf,
+      showHalfDay: showFullDayType && isHalf,
+      showPermissionFields: !showFullDayType,
+      fullDayBg: !isHalf ? accent : 'transparent', fullDayColor: !isHalf ? bg : ink,
+      halfDayBg: isHalf ? accent : 'transparent', halfDayColor: isHalf ? bg : ink,
+      selectFullDay: () => this.setLeaveDuration('Full day'),
+      selectHalfDay: () => this.setLeaveDuration('Half day'),
+      morningBg: s.halfSession === 'Morning' ? accent : 'transparent', morningColor: s.halfSession === 'Morning' ? bg : ink,
+      afternoonBg: s.halfSession === 'Afternoon' ? accent : 'transparent', afternoonColor: s.halfSession === 'Afternoon' ? bg : ink,
+      selectMorning: () => this.setHalfSession('Morning'),
+      selectAfternoon: () => this.setHalfSession('Afternoon'),
+      permissionFrom: s.permissionFrom, permissionTo: s.permissionTo,
+      onPermissionFromChange: this.onPermissionFromChange, onPermissionToChange: this.onPermissionToChange,
+      showMineList: !isManager || s.leaveView === 'mine',
+      showApprovalsList: isManager && s.leaveView === 'approvals',
+      myLeaveRequests, pendingApprovals,
+      noPending: pendingApprovals.length === 0,
+
+      rosterTabBg: s.teamView === 'roster' ? accent : 'transparent',
+      rosterTabColor: s.teamView === 'roster' ? bg : ink,
+      analyticsTabBg: s.teamView === 'analytics' ? accent : 'transparent',
+      analyticsTabColor: s.teamView === 'analytics' ? bg : ink,
+      selectTeamRoster: () => this.setTeamView('roster'),
+      selectTeamAnalytics: () => this.setTeamView('analytics'),
+      showRoster: s.teamView === 'roster',
+      showAnalytics: s.teamView === 'analytics',
+      rosterQuery: s.rosterQuery, onRosterQueryChange: this.onRosterQueryChange,
+      filteredRoster, weekBars,
+
+      userName: isManager ? 'Karthik Iyer' : 'Meera Nair',
+      userInitials: isManager ? 'KI' : 'MN',
+      userRoleLabel: isManager ? 'Associate Dentist' : 'Hygienist',
+      userId: isManager ? '0412' : '0307',
+      roleStaffBg: !isManager ? accent : 'transparent',
+      roleStaffColor: !isManager ? bg : ink,
+      roleManagerBg: isManager ? accent : 'transparent',
+      roleManagerColor: isManager ? bg : ink,
+      selectRoleStaff: () => this.setRole('staff'),
+      selectRoleManager: () => this.setRole('manager'),
+      settingsItems,
+      companyItems,
+    };
+  }
+}
+</script>
+</body>
+</html>
