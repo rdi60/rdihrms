@@ -1,0 +1,140 @@
+/* Modernist design tokens — source: Claude Design "Modernist" system used for the
+   Rajan Dental attendance app mockup. Keep in sync with the design if it changes. */
+:root {
+  --color-bg: #f3f2f2;
+  --color-surface: #eae9e9;
+  --color-text: #201e1d;
+  --color-accent: #ec3013;
+  --color-divider: rgba(32, 30, 29, 0.4);
+
+  --color-neutral-100: #f8f4f4;
+  --color-neutral-200: #eae7e7;
+  --color-neutral-500: #9b9797;
+  --color-neutral-700: #605d5d;
+  --color-neutral-800: #444141;
+
+  --color-accent-100: #fff2ef;
+  --color-accent-200: #ffe0d9;
+  --color-accent-600: #dd2b0f;
+  --color-accent-700: #ae1800;
+  --color-accent-800: #7c1405;
+
+  --font-heading: 'Archivo', system-ui, sans-serif;
+  --font-body: 'Archivo', system-ui, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: #eae7e7;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+input, textarea { caret-color: var(--color-accent); }
+::selection { background: rgba(236, 48, 19, 0.3); }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.hr { height: 2px; border: 0; margin: 0; background: var(--color-divider); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; font-family: var(--font-heading); font-weight: 800;
+  font-size: 14px; border: none; background: transparent; color: var(--color-text);
+  padding: 8px 14px;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--color-accent); color: var(--color-bg); }
+.btn-secondary { border: 1px solid var(--color-divider); }
+
+.input {
+  width: 100%; min-height: 36px; padding: 6px 10px;
+  font-size: 14px; background: var(--color-bg);
+  border: 1px solid var(--color-divider);
+}
+textarea.input { min-height: 64px; resize: vertical; }
+
+.seg { display: inline-flex; border: 1px solid var(--color-divider); }
+.seg-opt {
+  padding: 7px 14px; font-size: 13px; font-family: var(--font-heading); font-weight: 600;
+  border: none; cursor: pointer; background: transparent; color: var(--color-text);
+}
+.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
+.seg-opt[data-active='true'] { background: var(--color-accent); color: var(--color-bg); }
+
+.tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 3px 10px; }
+
+/* App shell */
+.app-viewport {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background: #eae7e7;
+}
+.app-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.app-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: env(safe-area-inset-top, 0) 0 0;
+}
+.app-page { padding: 20px 20px 28px; }
+
+.tab-bar {
+  display: flex;
+  border-top: 2px solid var(--color-divider);
+  background: var(--color-bg);
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0));
+}
+.tab-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: none; padding: 9px 2px 0; cursor: pointer;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.kicker {
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--color-accent-700); font-weight: 600; margin-bottom: 4px;
+}
+.section-label {
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700);
+}
+
+.icon-btn {
+  background: none; border: none; padding: 6px; cursor: pointer; color: var(--color-text);
+  display: flex; align-items: center;
+}
