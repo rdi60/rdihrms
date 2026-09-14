@@ -43,7 +43,7 @@ export function DepartmentDetail() {
   if (!id) return null;
 
   const assignedManagers = managers.filter((m) => assignedManagerIds.includes(m.id));
-  const availableManagers = managers.filter((m) => !assignedManagerIds.includes(m.id));
+  const availableManagers = managers.filter((m) => !assignedManagerIds.includes(m.id) && m.is_active);
 
   const onAddManager = async () => {
     if (!pickManagerId) return;
@@ -62,7 +62,9 @@ export function DepartmentDetail() {
     await load();
   };
 
-  const filteredStaff = profiles.filter((p) => p.full_name.toLowerCase().includes(query.trim().toLowerCase()));
+  const filteredStaff = profiles
+    .filter((p) => p.is_active || p.department_id === id) // keep a deactivated person visible only if already assigned here, so they can be removed
+    .filter((p) => p.full_name.toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
     <>
