@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  decideLeaveRequest,
+  approveLeaveRequest,
+  rejectLeaveRequest,
   listLeaveBalances,
   listMyLeaveRequests,
   listPendingApprovals,
@@ -28,6 +29,7 @@ export function Leave() {
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
   const [mine, setMine] = useState<LeaveRequest[]>([]);
   const [approvals, setApprovals] = useState<LeaveRequest[]>([]);
+  const [approvalError, setApprovalError] = useState<string | null>(null);
 
   const [leaveType, setLeaveType] = useState<LeaveTypeCode>('SL');
   const [duration, setDuration] = useState<LeaveDuration>('full');
@@ -89,9 +91,24 @@ export function Leave() {
     await load();
   };
 
-  const onDecide = async (id: string, status: 'approved' | 'rejected') => {
-    await decideLeaveRequest(id, status, profile.id);
-    await load();
+  const onApprove = async (id: string) => {
+    setApprovalError(null);
+    try {
+      await approveLeaveRequest(id);
+      await load();
+    } catch (err) {
+      setApprovalError(err instanceof Error ? err.message : 'Could not approve this request.');
+    }
+  };
+
+  const onReject = async (id: string) => {
+    setApprovalError(null);
+    try {
+      await rejectLeaveRequest(id);
+      await load();
+    } catch (err) {
+      setApprovalError(err instanceof Error ? err.message : 'Could not reject this request.');
+    }
   };
 
   const pendingCount = approvals.length;
@@ -219,26 +236,44 @@ export function Leave() {
 
       {isManager && view === 'approvals' && (
         <>
-          {approvals.map((p) => (
-            <div key={p.id} style={{ padding: '14px 0', borderBottom: '1px solid var(--color-divider)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>{p.profiles?.full_name}</div>
-                <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>{p.leave_type_code}</span>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--color-neutral-700)', marginBottom: 2 }}>
-                {formatShortDate(p.start_date)} – {formatShortDate(p.end_date)}
-              </div>
-              <div style={{ fontSize: 13, marginBottom: 10 }}>{p.reason}</div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn" style={{ flex: 1, background: '#201e1d', color: 'var(--color-bg)', fontSize: 12, padding: '8px 10px' }} onClick={() => onDecide(p.id, 'approved')}>
-                  <CheckIcon /> Approve
-                </button>
-                <button className="btn btn-secondary" style={{ flex: 1, fontSize: 12, padding: '8px 10px' }} onClick={() => onDecide(p.id, 'rejected')}>
-                  <XIcon /> Reject
-                </button>
-              </div>
+          {approvalError && (
+            <div style={{ padding: '10px 12px', marginBottom: 12, background: 'var(--color-accent-100)', color: 'var(--color-accent-800)', fontSize: 13 }}>
+              {approvalError}
             </div>
-          ))}
+          )}
+          {approvals.map((p) => {
+            const iAlreadyApproved = p.first_approved_by === profile.id;
+            return (
+              <div key={p.id} style={{ padding: '14px 0', borderBottom: '1px solid var(--color-divider)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{p.profiles?.full_name}</div>
+                  <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>{p.leave_type_code}</span>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--color-neutral-700)', marginBottom: 2 }}>
+                  {formatShortDate(p.start_date)} – {formatShortDate(p.end_date)}
+                </div>
+                <div style={{ fontSize: 13, marginBottom: 10 }}>{p.reason}</div>
+                {p.first_approved_by && (
+                  <div style={{ fontSize: 11, color: 'var(--color-accent-700)', fontWeight: 600, marginBottom: 10 }}>
+                    {iAlreadyApproved ? 'You approved this — waiting for a second manager.' : 'Approved by one manager — needs a second approval.'}
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    className="btn"
+                    disabled={iAlreadyApproved}
+                    style={{ flex: 1, background: '#201e1d', color: 'var(--color-bg)', fontSize: 12, padding: '8px 10px' }}
+                    onClick={() => onApprove(p.id)}
+                  >
+                    <CheckIcon /> Approve
+                  </button>
+                  <button className="btn btn-secondary" style={{ flex: 1, fontSize: 12, padding: '8px 10px' }} onClick={() => onReject(p.id)}>
+                    <XIcon /> Reject
+                  </button>
+                </div>
+              </div>
+            );
+          })}
           {approvals.length === 0 && (
             <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--color-neutral-500)', fontSize: 13 }}>No pending requests.</div>
           )}

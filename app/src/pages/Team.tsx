@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listAttendanceRange, listTodayRoster } from '../api/attendance';
 import { listPendingApprovals } from '../api/leave';
+import { listMyManagedDepartmentIds } from '../api/departments';
+import { useAuth } from '../context/AuthContext';
 import { addDays, startOfWeek, toDateStr } from '../lib/dates';
 import { SearchIcon } from '../icons';
 import type { AttendanceDay, Profile } from '../types';
@@ -22,22 +24,35 @@ function statusLabel(a: AttendanceDay | null): string {
 }
 
 export function Team() {
+  const { profile } = useAuth();
   const [tab, setTab] = useState<'roster' | 'analytics'>('roster');
   const [query, setQuery] = useState('');
   const [roster, setRoster] = useState<{ profile: Profile; today: AttendanceDay | null }[]>([]);
   const [weekDays, setWeekDays] = useState<AttendanceDay[]>([]);
   const [openLeave, setOpenLeave] = useState(0);
+  const [scopedDeptIds, setScopedDeptIds] = useState<string[]>([]);
 
   useEffect(() => {
+    if (!profile) return;
     listTodayRoster().then(setRoster);
     listPendingApprovals().then((r) => setOpenLeave(r.length));
+    listMyManagedDepartmentIds(profile.id).then(setScopedDeptIds);
     const monday = startOfWeek(new Date());
     listAttendanceRange(toDateStr(monday), toDateStr(addDays(monday, 6))).then(setWeekDays);
-  }, []);
+  }, [profile]);
 
-  const filtered = roster.filter((r) => r.profile.full_name.toLowerCase().includes(query.trim().toLowerCase()));
+  // A manager assigned to no department is unscoped and sees everyone.
+  const scopedRoster = scopedDeptIds.length === 0
+    ? roster
+    : roster.filter((r) => r.profile.department_id && scopedDeptIds.includes(r.profile.department_id));
+  const scopedProfileIds = new Set(scopedRoster.map((r) => r.profile.id));
+  const scopedWeekDays = scopedDeptIds.length === 0 ? weekDays : weekDays.filter((d) => scopedProfileIds.has(d.profile_id));
+
+  const filtered = scopedRoster.filter((r) => r.profile.full_name.toLowerCase().includes(query.trim().toLowerCase()));
 
   const stats = useMemo(() => {
+    const roster = scopedRoster;
+    const weekDays = scopedWeekDays;
     const total = roster.length || 1;
     const monday = startOfWeek(new Date());
     const byDate = new Map<string, AttendanceDay[]>();
@@ -79,7 +94,7 @@ export function Team() {
     const avgLateBy = lateCount ? Math.round(lateMinutesSum / lateCount) : 0;
 
     return { attendanceRate, onTimeRate, avgLateBy, weekBars };
-  }, [roster, weekDays]);
+  }, [scopedRoster, scopedWeekDays]);
 
   return (
     <>

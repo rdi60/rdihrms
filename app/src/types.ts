@@ -11,6 +11,13 @@ export interface Profile {
   shift_start: string; // HH:MM:SS
   shift_end: string; // HH:MM:SS
   weekly_hours: number;
+  department_id: string | null;
+}
+
+export interface Department {
+  id: string;
+  name: string;
+  created_at: string;
 }
 
 export type AttendanceStatus = 'present' | 'late' | 'absent' | 'leave' | 'holiday' | 'weekend';
@@ -53,6 +60,8 @@ export interface LeaveRequest {
   reason: string;
   status: LeaveStatus;
   created_at: string;
+  first_approved_by: string | null;
+  first_approved_at: string | null;
   profiles?: Pick<Profile, 'full_name'>;
 }
 

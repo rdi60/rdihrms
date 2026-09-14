@@ -59,14 +59,14 @@ export async function submitLeaveRequest(req: NewLeaveRequest): Promise<void> {
   if (error) throw error;
 }
 
-export async function decideLeaveRequest(
-  id: string,
-  status: 'approved' | 'rejected',
-  managerId: string
-): Promise<void> {
-  const { error } = await supabase
-    .from('leave_requests')
-    .update({ status, decided_by: managerId, decided_at: new Date().toISOString() })
-    .eq('id', id);
+export async function approveLeaveRequest(id: string): Promise<LeaveRequest> {
+  const { data, error } = await supabase.rpc('approve_leave_request', { request_id: id });
   if (error) throw error;
+  return data;
+}
+
+export async function rejectLeaveRequest(id: string): Promise<LeaveRequest> {
+  const { data, error } = await supabase.rpc('reject_leave_request', { request_id: id });
+  if (error) throw error;
+  return data;
 }

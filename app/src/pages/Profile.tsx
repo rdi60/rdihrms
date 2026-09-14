@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   BellIcon, LockIcon, GlobeIcon, HelpIcon, CalendarIcon, AwardIcon, GiftIcon, DownloadIcon,
-  ChevronRightIcon, LogOutIcon,
+  ChevronRightIcon, LogOutIcon, UsersIcon,
 } from '../icons';
 
 const COMPANY_ITEMS = [
@@ -10,6 +10,10 @@ const COMPANY_ITEMS = [
   { to: '/profile/anniversaries', label: 'Work anniversaries', Icon: AwardIcon },
   { to: '/profile/birthdays', label: 'Birthdays', Icon: GiftIcon },
   { to: '/profile/payslips', label: 'Payslips', Icon: DownloadIcon },
+];
+
+const ADMIN_ITEMS = [
+  { to: '/profile/departments', label: 'Departments', Icon: UsersIcon },
 ];
 
 const SETTINGS_ITEMS = [
@@ -52,6 +56,19 @@ export function Profile() {
           <span style={{ fontSize: 14, color: 'var(--color-neutral-500)', display: 'flex' }}><ChevronRightIcon /></span>
         </Link>
       ))}
+
+      {profile.role === 'manager' && (
+        <>
+          <div className="section-label" style={{ margin: '20px 0 8px' }}>Admin</div>
+          {ADMIN_ITEMS.map(({ to, label, Icon }) => (
+            <Link key={to} to={to} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 0', borderBottom: '1px solid var(--color-divider)', textDecoration: 'none', color: 'inherit' }}>
+              <span style={{ fontSize: 16, color: 'var(--color-neutral-700)', display: 'flex' }}><Icon /></span>
+              <span style={{ flex: 1, fontSize: 14, color: 'var(--color-text)' }}>{label}</span>
+              <span style={{ fontSize: 14, color: 'var(--color-neutral-500)', display: 'flex' }}><ChevronRightIcon /></span>
+            </Link>
+          ))}
+        </>
+      )}
 
       <div className="section-label" style={{ margin: '20px 0 8px' }}>Settings</div>
       {SETTINGS_ITEMS.map(({ label, Icon }) => (

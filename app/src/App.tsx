@@ -13,6 +13,8 @@ import { PublicHolidays } from './pages/PublicHolidays';
 import { WorkAnniversaries } from './pages/WorkAnniversaries';
 import { Birthdays } from './pages/Birthdays';
 import { Payslips } from './pages/Payslips';
+import { Departments } from './pages/Departments';
+import { DepartmentDetail } from './pages/DepartmentDetail';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
   const { profile } = useAuth();
@@ -45,6 +47,22 @@ export function App() {
         <Route path="profile/anniversaries" element={<WorkAnniversaries />} />
         <Route path="profile/birthdays" element={<Birthdays />} />
         <Route path="profile/payslips" element={<Payslips />} />
+        <Route
+          path="profile/departments"
+          element={
+            <ManagerRoute>
+              <Departments />
+            </ManagerRoute>
+          }
+        />
+        <Route
+          path="profile/departments/:id"
+          element={
+            <ManagerRoute>
+              <DepartmentDetail />
+            </ManagerRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
