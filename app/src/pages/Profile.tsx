@@ -14,7 +14,14 @@ const COMPANY_ITEMS = [
 
 const ADMIN_ITEMS = [
   { to: '/profile/departments', label: 'Departments', Icon: UsersIcon },
+  { to: '/profile/staff', label: 'Staff', Icon: UsersIcon },
 ];
+
+function roleLabel(role: string) {
+  if (role === 'admin') return 'Admin';
+  if (role === 'manager') return 'Manager';
+  return 'Staff';
+}
 
 const SETTINGS_ITEMS = [
   { label: 'Notifications', Icon: BellIcon },
@@ -43,7 +50,7 @@ export function Profile() {
         <div>
           <div style={{ fontWeight: 800, fontSize: 18 }}>{profile.full_name}</div>
           <div style={{ fontSize: 13, color: 'var(--color-neutral-700)' }}>
-            {profile.job_title ?? (profile.role === 'manager' ? 'Manager' : 'Staff')} · Employee #{profile.employee_code}
+            {profile.job_title ?? roleLabel(profile.role)} · Employee #{profile.employee_code}
           </div>
         </div>
       </div>
@@ -57,7 +64,7 @@ export function Profile() {
         </Link>
       ))}
 
-      {profile.role === 'manager' && (
+      {profile.role === 'admin' && (
         <>
           <div className="section-label" style={{ margin: '20px 0 8px' }}>Admin</div>
           {ADMIN_ITEMS.map(({ to, label, Icon }) => (

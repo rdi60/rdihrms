@@ -23,7 +23,7 @@ function tagStyle(status: LeaveStatus) {
 
 export function Leave() {
   const { profile } = useAuth();
-  const isManager = profile?.role === 'manager';
+  const isManager = profile?.role === 'manager' || profile?.role === 'admin';
   const [view, setView] = useState<'mine' | 'approvals'>('mine');
   const [showForm, setShowForm] = useState(false);
   const [balances, setBalances] = useState<LeaveBalance[]>([]);

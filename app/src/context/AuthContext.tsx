@@ -14,27 +14,38 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+const DEACTIVATED_MESSAGE = 'This account has been deactivated. Contact your manager.';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = async (userId: string) => {
+  // Loads the profile for a signed-in user; if their account has been
+  // deactivated, signs them back out immediately instead of letting them
+  // into the app. Returns an error message when that happens.
+  const loadProfileOrSignOut = async (userId: string): Promise<string | null> => {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (data && !data.is_active) {
+      setProfile(null);
+      await supabase.auth.signOut();
+      return DEACTIVATED_MESSAGE;
+    }
     setProfile(data);
+    return null;
   };
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
-      if (data.session) await loadProfile(data.session.user.id);
+      if (data.session) await loadProfileOrSignOut(data.session.user.id);
       setLoading(false);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
       if (next) {
-        loadProfile(next.user.id);
+        loadProfileOrSignOut(next.user.id);
       } else {
         setProfile(null);
       }
@@ -45,7 +56,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return error?.message ?? null;
+    if (error) return error.message;
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      const deactivatedMessage = await loadProfileOrSignOut(data.session.user.id);
+      if (deactivatedMessage) return deactivatedMessage;
+    }
+    return null;
   };
 
   const signOut = async () => {
@@ -53,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshProfile = async () => {
-    if (session) await loadProfile(session.user.id);
+    if (session) await loadProfileOrSignOut(session.user.id);
   };
 
   return (

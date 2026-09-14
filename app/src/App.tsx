@@ -15,10 +15,17 @@ import { Birthdays } from './pages/Birthdays';
 import { Payslips } from './pages/Payslips';
 import { Departments } from './pages/Departments';
 import { DepartmentDetail } from './pages/DepartmentDetail';
+import { AdminStaff } from './pages/AdminStaff';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
   const { profile } = useAuth();
-  return profile?.role === 'manager' ? children : <Navigate to="/" replace />;
+  const allowed = profile?.role === 'manager' || profile?.role === 'admin';
+  return allowed ? children : <Navigate to="/" replace />;
+}
+
+function AdminRoute({ children }: { children: ReactElement }) {
+  const { profile } = useAuth();
+  return profile?.role === 'admin' ? children : <Navigate to="/" replace />;
 }
 
 export function App() {
@@ -50,17 +57,25 @@ export function App() {
         <Route
           path="profile/departments"
           element={
-            <ManagerRoute>
+            <AdminRoute>
               <Departments />
-            </ManagerRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="profile/departments/:id"
           element={
-            <ManagerRoute>
+            <AdminRoute>
               <DepartmentDetail />
-            </ManagerRoute>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="profile/staff"
+          element={
+            <AdminRoute>
+              <AdminStaff />
+            </AdminRoute>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

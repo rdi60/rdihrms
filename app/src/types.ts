@@ -1,4 +1,4 @@
-export type Role = 'staff' | 'manager';
+export type Role = 'staff' | 'manager' | 'admin';
 
 export interface Profile {
   id: string;
@@ -12,6 +12,7 @@ export interface Profile {
   shift_end: string; // HH:MM:SS
   weekly_hours: number;
   department_id: string | null;
+  is_active: boolean;
 }
 
 export interface Department {
