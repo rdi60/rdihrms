@@ -49,7 +49,7 @@ export function Home() {
 
   return (
     <>
-      <div style={{ position: 'relative', paddingTop: 6, marginBottom: 16 }}>
+      <div style={{ position: 'relative', paddingTop: 14, marginBottom: 40 }}>
         <button
           className="icon-btn"
           onClick={() => navigate('/notifications')}
@@ -66,13 +66,8 @@ export function Home() {
           )}
         </button>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <Brandbar />
+          <Brandbar height={31} />
         </div>
-      </div>
-
-      <div style={{ textAlign: 'center' }}>
-        <div className="kicker">Rajan Dental</div>
-        <h1 style={{ fontSize: 28, marginBottom: 18 }}>Attendance</h1>
       </div>
 
       <div className="card" style={{ background: 'var(--color-accent-gradient)', boxShadow: 'var(--shadow-accent)', padding: 20, color: '#fff7f2' }}>

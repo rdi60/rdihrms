@@ -10,6 +10,9 @@ export function AppShell() {
   return (
     <div className="app-viewport">
       <div className="app-shell">
+        <div className="app-watermark" aria-hidden="true">
+          <img src="/logo.png" alt="" />
+        </div>
         <div className="app-scroll">
           <div className="app-page">
             <Outlet />

@@ -21,12 +21,8 @@ export function Login() {
   return (
     <div className="app-viewport" style={{ alignItems: 'center' }}>
       <div style={{ width: '100%', maxWidth: 360, padding: '0 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
-          <LogoMark size={40} />
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div className="kicker">Rajan Dental</div>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Sign in</h1>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 40 }}>
+          <LogoMark size={52} />
         </div>
         <form onSubmit={onSubmit} className="card" style={{ padding: 20 }}>
           <label style={{ display: 'block', fontSize: 11, color: 'var(--color-neutral-700)', marginBottom: 5 }}>
