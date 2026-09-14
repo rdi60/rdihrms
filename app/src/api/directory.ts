@@ -1,8 +1,9 @@
 import { supabase } from '../lib/supabase';
+import { todayStr } from '../lib/dates';
 import type { Holiday, Payslip, Profile } from '../types';
 
 export async function listUpcomingHolidays(): Promise<Holiday[]> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayStr();
   const { data, error } = await supabase
     .from('holidays')
     .select('*')

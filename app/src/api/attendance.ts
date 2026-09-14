@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { todayStr } from '../lib/dates';
+import { todayStr, toDateStr } from '../lib/dates';
 import type { AttendanceDay, Profile } from '../types';
 
 export async function getTodayAttendance(profileId: string): Promise<AttendanceDay | null> {
@@ -48,8 +48,8 @@ export async function listMonthAttendance(
   year: number,
   month: number // 0-indexed
 ): Promise<AttendanceDay[]> {
-  const start = new Date(year, month, 1).toISOString().slice(0, 10);
-  const end = new Date(year, month + 1, 0).toISOString().slice(0, 10);
+  const start = toDateStr(new Date(year, month, 1));
+  const end = toDateStr(new Date(year, month + 1, 0));
   const { data, error } = await supabase
     .from('attendance_days')
     .select('*')
