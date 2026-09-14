@@ -4,8 +4,8 @@ import { listApprovedLeaveOverlapping, listPendingApprovals } from '../api/leave
 import { listMyManagedDepartmentIds } from '../api/departments';
 import { useAuth } from '../context/AuthContext';
 import {
-  addDays, addMonths, eachDateInRange, endOfMonth, formatDayHeader, formatDayLabel, formatTime, formatTimeOfDay,
-  formatWeekRange, monthGrid, monthLabel, startOfMonth, startOfWeek, toDateStr,
+  addDays, addMonths, eachDateInRange, endOfMonth, formatDayHeader, formatDayLabel, formatShortDate, formatTime,
+  formatTimeOfDay, formatWeekRange, monthGrid, monthLabel, startOfMonth, startOfWeek, toDateStr,
 } from '../lib/dates';
 import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '../icons';
 import type { AttendanceDay, LeaveRequest, Profile } from '../types';
@@ -105,6 +105,32 @@ function MonthExceptionCalendar({
   );
 }
 
+type BreakdownStatus = 'present' | 'late' | 'leave' | 'absent';
+interface BreakdownEntry {
+  name: string;
+  date: string;
+  detail: string;
+}
+
+function BreakdownList({ entries, showDate }: { entries: BreakdownEntry[]; showDate: boolean }) {
+  return (
+    <div className="card" style={{ padding: 14, marginBottom: 18 }}>
+      {entries.length === 0 && (
+        <div style={{ fontSize: 12, color: 'var(--color-neutral-500)' }}>No one in this category.</div>
+      )}
+      {entries.map((e, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderTop: i > 0 ? '1px solid var(--color-divider)' : 'none' }}>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>{e.name}</div>
+          <div style={{ fontSize: 11, color: 'var(--color-neutral-700)', textAlign: 'right' }}>
+            {showDate && <span style={{ fontWeight: 700 }}>{formatShortDate(e.date)}{e.detail ? ' · ' : ''}</span>}
+            {e.detail}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function tagStyle(status: string) {
   if (status === 'Present') return { bg: 'var(--status-present-bg)', color: 'var(--status-present-text)' };
   if (status === 'Late') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)' };
@@ -150,6 +176,7 @@ export function Team() {
   const [periodDays, setPeriodDays] = useState<AttendanceDay[]>([]);
   const [approvedLeave, setApprovedLeave] = useState<LeaveRequest[]>([]);
   const [selectedDate, setSelectedDate] = useState(toDateStr(new Date()));
+  const [selectedStatus, setSelectedStatus] = useState<BreakdownStatus | null>(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -163,6 +190,7 @@ export function Team() {
     listAttendanceRange(toDateStr(start), toDateStr(end)).then(setPeriodDays);
     listApprovedLeaveOverlapping(toDateStr(start), toDateStr(end)).then(setApprovedLeave);
     setSelectedDate(toDateStr(anchor));
+    setSelectedStatus(null);
   }, [period, anchor]);
 
   // A manager assigned to no department is unscoped and sees everyone.
@@ -303,22 +331,33 @@ export function Team() {
       }
     }
 
-    // Day view: a status breakdown instead of bars.
-    let dayBreakdown: { present: number; late: number; leave: number; absent: number } | null = null;
-    if (period === 'day') {
-      const byProfile = new Map(scopedPeriodDays.map((d) => [d.profile_id, d]));
-      let present = 0, late = 0, leave = 0;
-      for (const r of scopedRoster) {
-        const rec = byProfile.get(r.profile.id);
-        if (rec?.status === 'present') present++;
-        else if (rec?.status === 'late') late++;
-        else if (rec?.status === 'leave') leave++;
+    // Status breakdown across every considered day in the period, with names.
+    const breakdown: Record<BreakdownStatus, BreakdownEntry[]> = { present: [], late: [], leave: [], absent: [] };
+    const byDateProfile = new Map<string, Map<string, AttendanceDay>>();
+    for (const d of scopedPeriodDays) {
+      const m = byDateProfile.get(d.work_date) ?? new Map<string, AttendanceDay>();
+      m.set(d.profile_id, d);
+      byDateProfile.set(d.work_date, m);
+    }
+    for (const d of consideredDates) {
+      const dateStr = toDateStr(d);
+      const dayMap = byDateProfile.get(dateStr) ?? new Map<string, AttendanceDay>();
+      for (const ex of exceptionsByDate.get(dateStr) ?? []) {
+        if (ex.kind === 'late') breakdown.late.push({ name: ex.name, date: dateStr, detail: ex.detail });
+        if (ex.kind === 'leave') breakdown.leave.push({ name: ex.name, date: dateStr, detail: ex.detail });
       }
-      dayBreakdown = { present, late, leave, absent: Math.max(scopedRoster.length - present - late - leave, 0) };
+      for (const r of scopedRoster) {
+        const rec = dayMap.get(r.profile.id);
+        if (rec?.status === 'present') {
+          breakdown.present.push({ name: r.profile.full_name, date: dateStr, detail: rec.clock_in ? `In ${formatTime(rec.clock_in)}` : '' });
+        } else if (rec?.status !== 'late' && rec?.status !== 'leave') {
+          breakdown.absent.push({ name: r.profile.full_name, date: dateStr, detail: '' });
+        }
+      }
     }
 
-    return { attendanceRate, onTimeRate, avgLateBy, bars, dayBreakdown };
-  }, [scopedRoster, scopedPeriodDays, period, anchor]);
+    return { attendanceRate, onTimeRate, avgLateBy, bars, breakdown };
+  }, [scopedRoster, scopedPeriodDays, exceptionsByDate, period, anchor]);
 
   return (
     <>
@@ -398,16 +437,28 @@ export function Team() {
             <Stat label="Open leave" value={String(openLeave)} />
           </div>
 
-          {period === 'day' && stats.dayBreakdown && (
-            <>
-              <div className="section-label" style={{ marginBottom: 10 }}>Status breakdown</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
-                <Stat label="Present" value={String(stats.dayBreakdown.present)} bg="var(--status-present-bg)" fg="var(--status-present-text)" />
-                <Stat label="Late" value={String(stats.dayBreakdown.late)} bg="var(--status-late-bg)" fg="var(--status-late-text)" />
-                <Stat label="On leave" value={String(stats.dayBreakdown.leave)} bg="var(--status-leave-bg)" fg="var(--status-leave-text)" />
-                <Stat label="Absent" value={String(stats.dayBreakdown.absent)} bg="var(--status-absent-bg)" fg="var(--status-absent-text)" />
-              </div>
-            </>
+          <div className="section-label" style={{ marginBottom: 10 }}>Status breakdown — tap a tile for names</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: selectedStatus ? 10 : 18 }}>
+            <Stat
+              label="Present" value={String(stats.breakdown.present.length)} bg="var(--status-present-bg)" fg="var(--status-present-text)"
+              active={selectedStatus === 'present'} onClick={() => setSelectedStatus((s) => (s === 'present' ? null : 'present'))}
+            />
+            <Stat
+              label="Late" value={String(stats.breakdown.late.length)} bg="var(--status-late-bg)" fg="var(--status-late-text)"
+              active={selectedStatus === 'late'} onClick={() => setSelectedStatus((s) => (s === 'late' ? null : 'late'))}
+            />
+            <Stat
+              label="On leave" value={String(stats.breakdown.leave.length)} bg="var(--status-leave-bg)" fg="var(--status-leave-text)"
+              active={selectedStatus === 'leave'} onClick={() => setSelectedStatus((s) => (s === 'leave' ? null : 'leave'))}
+            />
+            <Stat
+              label="Absent" value={String(stats.breakdown.absent.length)} bg="var(--status-absent-bg)" fg="var(--status-absent-text)"
+              active={selectedStatus === 'absent'} onClick={() => setSelectedStatus((s) => (s === 'absent' ? null : 'absent'))}
+            />
+          </div>
+
+          {selectedStatus && (
+            <BreakdownList entries={stats.breakdown[selectedStatus]} showDate={period !== 'day'} />
           )}
 
           {period !== 'day' && (
@@ -469,11 +520,24 @@ export function Team() {
   );
 }
 
-function Stat({ label, value, bg, fg }: { label: string; value: string; bg?: string; fg?: string }) {
+function Stat({
+  label, value, bg, fg, onClick, active,
+}: {
+  label: string; value: string; bg?: string; fg?: string; onClick?: () => void; active?: boolean;
+}) {
+  const Tag = (onClick ? 'button' : 'div') as 'button' | 'div';
   return (
-    <div className="card" style={{ padding: 15, background: bg ?? 'var(--color-surface)', boxShadow: bg ? 'none' : 'var(--shadow-sm)' }}>
+    <Tag
+      className="card"
+      onClick={onClick}
+      style={{
+        padding: 15, background: bg ?? 'var(--color-surface)', boxShadow: bg ? 'none' : 'var(--shadow-sm)',
+        textAlign: 'left', width: '100%', fontFamily: 'inherit', cursor: onClick ? 'pointer' : undefined,
+        border: active ? '2px solid var(--color-accent)' : '1px solid transparent',
+      }}
+    >
       <div className="section-label" style={{ marginBottom: 6, color: fg ?? undefined }}>{label}</div>
       <div style={{ fontSize: 22, fontWeight: 800, color: fg ?? undefined }}>{value}</div>
-    </div>
+    </Tag>
   );
 }
