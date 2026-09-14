@@ -57,10 +57,13 @@ export function getAvatarUrl(path: string | null): string | null {
 
 export async function uploadStaffPhoto(profileId: string, file: File): Promise<void> {
   const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-  const path = `${profileId}.${ext}`;
+  // Unique filename per upload so the public URL changes too — otherwise a
+  // re-upload keeps the exact same URL and browsers keep showing the old
+  // cached image even though the file underneath has changed.
+  const path = `${profileId}_${Date.now()}.${ext}`;
   const { error: uploadError } = await supabase.storage
     .from('avatars')
-    .upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
+    .upload(path, file, { contentType: file.type || 'image/jpeg' });
   if (uploadError) throw uploadError;
   const { error } = await supabase.from('profiles').update({ avatar_path: path }).eq('id', profileId);
   if (error) throw error;
