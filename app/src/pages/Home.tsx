@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { clockIn, clockOut, getTodayAttendance, listRecentActivity } from '../api/attendance';
 import { hasUnreadNotifications } from '../api/notifications';
+import { uploadStaffPhoto } from '../api/admin';
 import { formatTime } from '../lib/dates';
-import { BellIcon, ClockIcon, LogOutIcon, CheckCircleIcon } from '../icons';
+import { BellIcon, ClockIcon, LogOutIcon, CheckCircleIcon, PlusIcon } from '../icons';
 import { Brandbar } from '../components/Logo';
 import { Avatar } from '../components/Avatar';
 import type { AttendanceDay } from '../types';
@@ -22,12 +23,14 @@ function roleTag(role: string) {
 }
 
 export function Home() {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [today, setToday] = useState<AttendanceDay | null>(null);
   const [recent, setRecent] = useState<AttendanceDay[]>([]);
   const [unread, setUnread] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!profile) return;
@@ -61,6 +64,22 @@ export function Home() {
     }
   };
 
+  const onPhotoSelected = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setUploadingPhoto(true);
+    setPhotoError(null);
+    try {
+      await uploadStaffPhoto(profile.id, file);
+      await refreshProfile();
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : 'Could not upload your photo.');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   return (
     <>
       <div style={{ position: 'relative', paddingTop: 14, marginBottom: 40 }}>
@@ -85,7 +104,19 @@ export function Home() {
       </div>
 
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 18, marginBottom: 14 }}>
-        <Avatar profile={profile} size={56} variant="gradient" />
+        <label style={{ position: 'relative', flex: 'none', cursor: 'pointer', opacity: uploadingPhoto ? 0.5 : 1 }}>
+          <Avatar profile={profile} size={56} variant="gradient" />
+          <span
+            style={{
+              position: 'absolute', bottom: -2, right: -2, width: 20, height: 20, borderRadius: '50%',
+              background: 'var(--color-accent-700)', color: '#fff', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: 11, border: '2px solid var(--color-surface)',
+            }}
+          >
+            <PlusIcon />
+          </span>
+          <input type="file" accept="image/*" onChange={onPhotoSelected} disabled={uploadingPhoto} style={{ display: 'none' }} />
+        </label>
         <div style={{ minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ fontWeight: 800, fontSize: 18 }}>{profile.full_name}</div>
@@ -96,6 +127,9 @@ export function Home() {
           </div>
         </div>
       </div>
+      {photoError && (
+        <div style={{ fontSize: 12, color: 'var(--status-absent-text)', marginBottom: 14 }}>{photoError}</div>
+      )}
 
       <div className="card" style={{ background: 'var(--color-accent-gradient)', boxShadow: 'var(--shadow-accent)', padding: 20, color: '#fff7f2' }}>
         <div style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700, opacity: 0.85, marginBottom: 6 }}>
