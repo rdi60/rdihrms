@@ -75,7 +75,7 @@ export async function buildRangePunchReport(startStr: string, endStr: string): P
   const { roster, deptById, attendanceByProfileDate, leaveByProfileDate } = await buildContext(startStr, endStr);
   const dates = eachDateInRange(start, end);
 
-  return roster.map((p: Profile) => ({
+  return roster.filter((p) => p.is_active).map((p: Profile) => ({
     employeeCode: p.employee_code,
     fullName: p.full_name,
     department: p.department_id ? deptById.get(p.department_id) ?? '' : '',

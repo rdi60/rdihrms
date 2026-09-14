@@ -81,6 +81,16 @@ export async function listAttendanceRange(start: string, end: string): Promise<A
   return data ?? [];
 }
 
+export async function markWeeklyOff(profileId: string, workDate: string): Promise<void> {
+  const { error } = await supabase.rpc('mark_weekly_off', { p_profile_id: profileId, p_work_date: workDate });
+  if (error) throw error;
+}
+
+export async function clearWeeklyOff(profileId: string, workDate: string): Promise<void> {
+  const { error } = await supabase.rpc('clear_weekly_off', { p_profile_id: profileId, p_work_date: workDate });
+  if (error) throw error;
+}
+
 export async function listTodayRoster(): Promise<
   { profile: Profile; today: AttendanceDay | null }[]
 > {

@@ -46,7 +46,7 @@ export async function buildPayrollReport(
   const leaveTypeCodes = leaveTypes.map((t) => t.code).filter((c) => c !== 'Permission');
 
   const byProfile = new Map<string, PayrollRow>();
-  for (const p of roster) {
+  for (const p of roster.filter((r) => r.is_active)) {
     byProfile.set(p.id, {
       employeeCode: p.employee_code,
       fullName: p.full_name,

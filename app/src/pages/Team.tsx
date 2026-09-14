@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { listAttendanceRange, listTodayRoster } from '../api/attendance';
 import { listApprovedLeaveOverlapping, listPendingApprovals } from '../api/leave';
 import { listMyManagedDepartmentIds } from '../api/departments';
@@ -166,6 +167,7 @@ function periodLabel(period: Period, anchor: Date): string {
 
 export function Team() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<'roster' | 'analytics' | 'calendar'>('roster');
   const [query, setQuery] = useState('');
   const [roster, setRoster] = useState<{ profile: Profile; today: AttendanceDay | null }[]>([]);
@@ -376,6 +378,9 @@ export function Team() {
 
       {tab === 'roster' && (
         <>
+          <button className="btn btn-secondary" style={{ width: '100%', fontSize: 12, padding: '9px 10px', marginBottom: 12 }} onClick={() => navigate('/team/weekly-off')}>
+            Mark weekly off
+          </button>
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', marginBottom: 14, boxShadow: 'none', border: '1px solid var(--color-divider)' }}>
             <span style={{ fontSize: 15, color: 'var(--color-neutral-700)', display: 'flex' }}><SearchIcon /></span>
             <input

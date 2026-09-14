@@ -25,6 +25,7 @@ import { BulkStaffDates } from './pages/BulkStaffDates';
 import { BulkStaffPhotos } from './pages/BulkStaffPhotos';
 import { PayrollReport } from './pages/PayrollReport';
 import { PunchReport } from './pages/PunchReport';
+import { MarkWeeklyOff } from './pages/MarkWeeklyOff';
 import { ChangePassword } from './pages/ChangePassword';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
@@ -55,6 +56,14 @@ export function App() {
           element={
             <ManagerRoute>
               <Team />
+            </ManagerRoute>
+          }
+        />
+        <Route
+          path="team/weekly-off"
+          element={
+            <ManagerRoute>
+              <MarkWeeklyOff />
             </ManagerRoute>
           }
         />
