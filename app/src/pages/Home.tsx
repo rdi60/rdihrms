@@ -6,7 +6,20 @@ import { hasUnreadNotifications } from '../api/notifications';
 import { formatTime } from '../lib/dates';
 import { BellIcon, ClockIcon, LogOutIcon, CheckCircleIcon } from '../icons';
 import { Brandbar } from '../components/Logo';
+import { Avatar } from '../components/Avatar';
 import type { AttendanceDay } from '../types';
+
+function roleLabel(role: string) {
+  if (role === 'admin') return 'Admin';
+  if (role === 'manager') return 'Manager';
+  return 'Staff';
+}
+
+function roleTag(role: string) {
+  if (role === 'admin') return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)' };
+  if (role === 'manager') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)' };
+  return null;
+}
 
 export function Home() {
   const { profile } = useAuth();
@@ -35,6 +48,7 @@ export function Home() {
   if (!profile) return null;
 
   const clockedIn = !!today?.clock_in && !today?.clock_out;
+  const tag = roleTag(profile.role);
 
   const onToggleClock = async () => {
     setBusy(true);
@@ -67,6 +81,19 @@ export function Home() {
         </button>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <Brandbar height={31} />
+        </div>
+      </div>
+
+      <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 18, marginBottom: 14 }}>
+        <Avatar profile={profile} size={56} variant="gradient" />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontWeight: 800, fontSize: 18 }}>{profile.full_name}</div>
+            {tag && <span className="tag" style={{ background: tag.bg, color: tag.color }}>{roleLabel(profile.role)}</span>}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--color-neutral-700)' }}>
+            {profile.job_title ?? roleLabel(profile.role)} · Employee #{profile.employee_code}
+          </div>
         </div>
       </div>
 

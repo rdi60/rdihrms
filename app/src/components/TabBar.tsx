@@ -7,7 +7,7 @@ const TABS = [
   { to: '/history', label: 'History', Icon: CalendarIcon },
   { to: '/leave', label: 'Leave', Icon: ClipboardIcon },
   { to: '/team', label: 'Team', Icon: UsersIcon, managerOnly: true },
-  { to: '/profile', label: 'Profile', Icon: UserIcon },
+  { to: '/profile', label: 'Misc', Icon: UserIcon },
 ];
 
 export function TabBar() {

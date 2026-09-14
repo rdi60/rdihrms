@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Avatar } from '../components/Avatar';
 import {
   BellIcon, LockIcon, GlobeIcon, HelpIcon, CalendarIcon, AwardIcon, GiftIcon, DownloadIcon,
   ChevronRightIcon, LogOutIcon, UsersIcon, UserIcon, ClockIcon,
@@ -25,18 +24,6 @@ const ADMIN_ITEMS = [
   { to: '/profile/staff-dates/bulk', label: 'Bulk upload birthdays & anniversaries', Icon: GiftIcon },
   { to: '/profile/staff-photos/bulk', label: 'Bulk upload staff photos', Icon: UserIcon },
 ];
-
-function roleLabel(role: string) {
-  if (role === 'admin') return 'Admin';
-  if (role === 'manager') return 'Manager';
-  return 'Staff';
-}
-
-function roleTag(role: string) {
-  if (role === 'admin') return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)' };
-  if (role === 'manager') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)' };
-  return null;
-}
 
 const SETTINGS_ITEMS = [
   { label: 'Notifications', Icon: BellIcon },
@@ -63,28 +50,14 @@ function RowLink({ to, label, Icon, last }: { to: string; label: string; Icon: (
 export function Profile() {
   const { profile, signOut } = useAuth();
   if (!profile) return null;
-  const tag = roleTag(profile.role);
 
   return (
     <>
       <div style={{ paddingTop: 6 }}>
         <div className="kicker">Account</div>
-        <h1 style={{ fontSize: 28 }}>Profile</h1>
+        <h1 style={{ fontSize: 28 }}>Misc</h1>
       </div>
       <div className="hr" style={{ margin: '16px 0 20px' }} />
-
-      <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 18, marginBottom: 22 }}>
-        <Avatar profile={profile} size={56} variant="gradient" />
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>{profile.full_name}</div>
-            {tag && <span className="tag" style={{ background: tag.bg, color: tag.color }}>{roleLabel(profile.role)}</span>}
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--color-neutral-700)' }}>
-            {profile.job_title ?? roleLabel(profile.role)} · Employee #{profile.employee_code}
-          </div>
-        </div>
-      </div>
 
       <div className="section-label" style={{ margin: '0 0 10px' }}>Company</div>
       <div className="card" style={{ marginBottom: 22 }}>
