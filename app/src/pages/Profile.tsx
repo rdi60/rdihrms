@@ -19,6 +19,7 @@ const COMPANY_ITEMS = [
 const ADMIN_ITEMS = [
   { to: '/profile/departments', label: 'Departments', Icon: UsersIcon },
   { to: '/profile/staff', label: 'Staff', Icon: UsersIcon },
+  { to: '/profile/payroll-report', label: 'Payroll report', Icon: DownloadIcon },
   { to: '/profile/holidays/bulk', label: 'Bulk upload holidays', Icon: CalendarIcon },
   { to: '/profile/staff-dates/bulk', label: 'Bulk upload birthdays & anniversaries', Icon: GiftIcon },
   { to: '/profile/staff-photos/bulk', label: 'Bulk upload staff photos', Icon: UserIcon },

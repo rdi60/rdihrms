@@ -23,6 +23,7 @@ import { BulkLeaveBalances } from './pages/BulkLeaveBalances';
 import { BulkHolidays } from './pages/BulkHolidays';
 import { BulkStaffDates } from './pages/BulkStaffDates';
 import { BulkStaffPhotos } from './pages/BulkStaffPhotos';
+import { PayrollReport } from './pages/PayrollReport';
 import { ChangePassword } from './pages/ChangePassword';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
@@ -139,6 +140,14 @@ export function App() {
           element={
             <AdminRoute>
               <BulkStaffPhotos />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="profile/payroll-report"
+          element={
+            <AdminRoute>
+              <PayrollReport />
             </AdminRoute>
           }
         />
