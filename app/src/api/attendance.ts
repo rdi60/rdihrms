@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase';
 import { todayStr, toDateStr } from '../lib/dates';
-import { compareEmployeeCode } from '../lib/sort';
 import type { AttendanceDay, Profile } from '../types';
 
 export async function getTodayAttendance(profileId: string): Promise<AttendanceDay | null> {
@@ -95,14 +94,12 @@ export async function clearWeeklyOff(profileId: string, workDate: string): Promi
 export async function listTodayRoster(): Promise<
   { profile: Profile; today: AttendanceDay | null }[]
 > {
-  const { data: profiles, error } = await supabase.from('profiles').select('*');
+  const { data: profiles, error } = await supabase.from('profiles').select('*').order('employee_code');
   if (error) throw error;
   const { data: today } = await supabase
     .from('attendance_days')
     .select('*')
     .eq('work_date', todayStr());
   const byProfile = new Map((today ?? []).map((a) => [a.profile_id, a]));
-  return (profiles ?? [])
-    .sort((a, b) => compareEmployeeCode(a.employee_code, b.employee_code))
-    .map((p) => ({ profile: p, today: byProfile.get(p.id) ?? null }));
+  return (profiles ?? []).map((p) => ({ profile: p, today: byProfile.get(p.id) ?? null }));
 }
