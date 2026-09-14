@@ -4,7 +4,7 @@ import { listApprovedLeaveOverlapping, listPendingApprovals } from '../api/leave
 import { listMyManagedDepartmentIds } from '../api/departments';
 import { useAuth } from '../context/AuthContext';
 import {
-  addDays, addMonths, eachDateInRange, endOfMonth, formatDayHeader, formatDayLabel, formatTimeOfDay,
+  addDays, addMonths, eachDateInRange, endOfMonth, formatDayHeader, formatDayLabel, formatTime, formatTimeOfDay,
   formatWeekRange, monthGrid, monthLabel, startOfMonth, startOfWeek, toDateStr,
 } from '../lib/dates';
 import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '../icons';
@@ -18,6 +18,13 @@ interface Exception {
   name: string;
   kind: ExceptionKind;
   detail: string;
+}
+
+function permissionMinutes(from: string | null, to: string | null): number {
+  if (!from || !to) return 0;
+  const [fh, fm] = from.split(':').map(Number);
+  const [th, tm] = to.split(':').map(Number);
+  return Math.max(0, (th * 60 + tm) - (fh * 60 + fm));
 }
 
 function exceptionTag(kind: ExceptionKind) {
@@ -185,7 +192,7 @@ export function Team() {
         const shiftStart = new Date(a.clock_in);
         shiftStart.setHours(h, m, 0, 0);
         const lateBy = Math.max(0, Math.round((new Date(a.clock_in).getTime() - shiftStart.getTime()) / 60000));
-        push(a.work_date, { name: p.full_name, kind: 'late', detail: `Late by ${lateBy} min` });
+        push(a.work_date, { name: p.full_name, kind: 'late', detail: `In ${formatTime(a.clock_in)} · Late by ${lateBy} min` });
       }
       if (a.clock_out) {
         const [h, m] = p.shift_end.split(':').map(Number);
@@ -193,7 +200,7 @@ export function Team() {
         shiftEnd.setHours(h, m, 0, 0);
         const earlyBy = Math.round((shiftEnd.getTime() - new Date(a.clock_out).getTime()) / 60000);
         if (earlyBy > 5) {
-          push(a.work_date, { name: p.full_name, kind: 'early', detail: `Left ${earlyBy} min early` });
+          push(a.work_date, { name: p.full_name, kind: 'early', detail: `Out ${formatTime(a.clock_out)} · ${earlyBy} min early` });
         }
       }
     }
@@ -201,7 +208,12 @@ export function Team() {
     for (const req of scopedApprovedLeave) {
       const name = req.profiles?.full_name ?? profileById.get(req.profile_id)?.full_name ?? 'Staff';
       if (req.duration === 'permission') {
-        push(req.start_date, { name, kind: 'permission', detail: `Permission ${formatTimeOfDay(req.permission_from)}–${formatTimeOfDay(req.permission_to)}` });
+        const totalMin = permissionMinutes(req.permission_from, req.permission_to);
+        push(req.start_date, {
+          name,
+          kind: 'permission',
+          detail: `${formatTimeOfDay(req.permission_from)}–${formatTimeOfDay(req.permission_to)} · ${totalMin} min`,
+        });
       } else {
         for (const d of eachDateInRange(new Date(`${req.start_date}T00:00:00`), new Date(`${req.end_date}T00:00:00`))) {
           push(toDateStr(d), { name, kind: 'leave', detail: `${req.leave_type_code} leave${req.duration === 'half' ? ` (${req.half_session})` : ''}` });
