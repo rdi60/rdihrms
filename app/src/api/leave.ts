@@ -25,7 +25,7 @@ export async function listMyLeaveRequests(profileId: string): Promise<LeaveReque
 export async function listPendingApprovals(): Promise<LeaveRequest[]> {
   const { data, error } = await supabase
     .from('leave_requests')
-    .select('*, profiles(full_name)')
+    .select('*, profiles!leave_requests_profile_id_fkey(full_name)')
     .eq('status', 'pending')
     .order('created_at', { ascending: true });
   if (error) throw error;
