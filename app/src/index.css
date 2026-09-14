@@ -32,6 +32,10 @@
   --status-absent-text: var(--color-accent-700);
   --status-neutral-bg: #f1ece7;
   --status-neutral-text: var(--color-neutral-700);
+  --status-permission-bg: #dceefc;
+  --status-permission-text: #1f6fa8;
+  --status-early-bg: #fbe0e0;
+  --status-early-text: #b23a3a;
 
   --font-heading: 'Sora', system-ui, sans-serif;
   --font-body: 'Manrope', system-ui, sans-serif;

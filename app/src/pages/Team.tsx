@@ -1,17 +1,102 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listAttendanceRange, listTodayRoster } from '../api/attendance';
-import { listPendingApprovals } from '../api/leave';
+import { listApprovedLeaveOverlapping, listPendingApprovals } from '../api/leave';
 import { listMyManagedDepartmentIds } from '../api/departments';
 import { useAuth } from '../context/AuthContext';
 import {
-  addDays, addMonths, eachDateInRange, endOfMonth, formatDayHeader, formatWeekRange,
-  monthLabel, startOfMonth, startOfWeek, toDateStr,
+  addDays, addMonths, eachDateInRange, endOfMonth, formatDayHeader, formatDayLabel, formatTimeOfDay,
+  formatWeekRange, monthGrid, monthLabel, startOfMonth, startOfWeek, toDateStr,
 } from '../lib/dates';
 import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '../icons';
-import type { AttendanceDay, Profile } from '../types';
+import type { AttendanceDay, LeaveRequest, Profile } from '../types';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 type Period = 'day' | 'week' | 'month';
+
+type ExceptionKind = 'late' | 'leave' | 'permission' | 'early';
+interface Exception {
+  name: string;
+  kind: ExceptionKind;
+  detail: string;
+}
+
+function exceptionTag(kind: ExceptionKind) {
+  if (kind === 'late') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)', label: 'Late' };
+  if (kind === 'leave') return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)', label: 'Leave' };
+  if (kind === 'permission') return { bg: 'var(--status-permission-bg)', color: 'var(--status-permission-text)', label: 'Permission' };
+  return { bg: 'var(--status-early-bg)', color: 'var(--status-early-text)', label: 'Early out' };
+}
+
+function ExceptionList({ label, items }: { label?: string; items: Exception[] }) {
+  return (
+    <div className="card" style={{ padding: 14, marginBottom: 10 }}>
+      {label && <div style={{ fontWeight: 800, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--color-neutral-700)', marginBottom: items.length ? 10 : 0 }}>{label}</div>}
+      {items.length === 0 && (
+        <div style={{ fontSize: 12, color: 'var(--color-neutral-500)' }}>No exceptions.</div>
+      )}
+      {items.map((ex, i) => {
+        const tag = exceptionTag(ex.kind);
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderTop: i > 0 ? '1px solid var(--color-divider)' : 'none' }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: 13 }}>{ex.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>{ex.detail}</div>
+            </div>
+            <span className="tag" style={{ background: tag.bg, color: tag.color, flex: 'none' }}>{tag.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MonthExceptionCalendar({
+  anchor, exceptionsByDate, selectedDate, onSelectDate,
+}: {
+  anchor: Date;
+  exceptionsByDate: Map<string, Exception[]>;
+  selectedDate: string;
+  onSelectDate: (d: string) => void;
+}) {
+  const year = anchor.getFullYear();
+  const month = anchor.getMonth();
+  const grid = monthGrid(year, month);
+  return (
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 1, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-neutral-700)', marginBottom: 6, textAlign: 'center' }}>
+        {WEEKDAY_LABELS.map((l) => <div key={l}>{l[0]}</div>)}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4, marginBottom: 14 }}>
+        {grid.map((day, i) => {
+          if (day === null) return <div key={i} />;
+          const dateStr = toDateStr(new Date(year, month, day));
+          const items = exceptionsByDate.get(dateStr) ?? [];
+          const kinds = Array.from(new Set(items.map((x) => x.kind)));
+          const isSelected = dateStr === selectedDate;
+          return (
+            <button
+              key={i}
+              onClick={() => onSelectDate(dateStr)}
+              style={{
+                aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+                borderRadius: 'var(--radius-sm)', border: isSelected ? '2px solid var(--color-accent)' : '1px solid var(--color-divider)',
+                background: 'var(--color-surface)', cursor: 'pointer', fontFamily: 'inherit', padding: 0,
+              }}
+            >
+              <span style={{ fontSize: 12, fontWeight: 700 }}>{day}</span>
+              <span style={{ display: 'flex', gap: 2, height: 5 }}>
+                {kinds.slice(0, 4).map((k) => (
+                  <span key={k} style={{ width: 5, height: 5, borderRadius: '50%', background: exceptionTag(k).color }} />
+                ))}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <ExceptionList label={formatDayLabel(selectedDate)} items={exceptionsByDate.get(selectedDate) ?? []} />
+    </>
+  );
+}
 
 function tagStyle(status: string) {
   if (status === 'Present') return { bg: 'var(--status-present-bg)', color: 'var(--status-present-text)' };
@@ -47,7 +132,7 @@ function periodLabel(period: Period, anchor: Date): string {
 
 export function Team() {
   const { profile } = useAuth();
-  const [tab, setTab] = useState<'roster' | 'analytics'>('roster');
+  const [tab, setTab] = useState<'roster' | 'analytics' | 'calendar'>('roster');
   const [query, setQuery] = useState('');
   const [roster, setRoster] = useState<{ profile: Profile; today: AttendanceDay | null }[]>([]);
   const [openLeave, setOpenLeave] = useState(0);
@@ -56,6 +141,8 @@ export function Team() {
   const [period, setPeriod] = useState<Period>('week');
   const [anchor, setAnchor] = useState(new Date());
   const [periodDays, setPeriodDays] = useState<AttendanceDay[]>([]);
+  const [approvedLeave, setApprovedLeave] = useState<LeaveRequest[]>([]);
+  const [selectedDate, setSelectedDate] = useState(toDateStr(new Date()));
 
   useEffect(() => {
     if (!profile) return;
@@ -67,6 +154,8 @@ export function Team() {
   useEffect(() => {
     const { start, end } = periodRange(period, anchor);
     listAttendanceRange(toDateStr(start), toDateStr(end)).then(setPeriodDays);
+    listApprovedLeaveOverlapping(toDateStr(start), toDateStr(end)).then(setApprovedLeave);
+    setSelectedDate(toDateStr(anchor));
   }, [period, anchor]);
 
   // A manager assigned to no department is unscoped and sees everyone.
@@ -75,6 +164,53 @@ export function Team() {
     : roster.filter((r) => r.profile.department_id && scopedDeptIds.includes(r.profile.department_id));
   const scopedProfileIds = new Set(scopedRoster.map((r) => r.profile.id));
   const scopedPeriodDays = scopedDeptIds.length === 0 ? periodDays : periodDays.filter((d) => scopedProfileIds.has(d.profile_id));
+  const scopedApprovedLeave = scopedDeptIds.length === 0
+    ? approvedLeave
+    : approvedLeave.filter((l) => scopedProfileIds.has(l.profile_id));
+
+  const exceptionsByDate = useMemo(() => {
+    const map = new Map<string, Exception[]>();
+    const push = (dateStr: string, ex: Exception) => {
+      const list = map.get(dateStr) ?? [];
+      list.push(ex);
+      map.set(dateStr, list);
+    };
+    const profileById = new Map(scopedRoster.map((r) => [r.profile.id, r.profile]));
+
+    for (const a of scopedPeriodDays) {
+      const p = profileById.get(a.profile_id);
+      if (!p) continue;
+      if (a.status === 'late' && a.clock_in) {
+        const [h, m] = p.shift_start.split(':').map(Number);
+        const shiftStart = new Date(a.clock_in);
+        shiftStart.setHours(h, m, 0, 0);
+        const lateBy = Math.max(0, Math.round((new Date(a.clock_in).getTime() - shiftStart.getTime()) / 60000));
+        push(a.work_date, { name: p.full_name, kind: 'late', detail: `Late by ${lateBy} min` });
+      }
+      if (a.clock_out) {
+        const [h, m] = p.shift_end.split(':').map(Number);
+        const shiftEnd = new Date(a.clock_out);
+        shiftEnd.setHours(h, m, 0, 0);
+        const earlyBy = Math.round((shiftEnd.getTime() - new Date(a.clock_out).getTime()) / 60000);
+        if (earlyBy > 5) {
+          push(a.work_date, { name: p.full_name, kind: 'early', detail: `Left ${earlyBy} min early` });
+        }
+      }
+    }
+
+    for (const req of scopedApprovedLeave) {
+      const name = req.profiles?.full_name ?? profileById.get(req.profile_id)?.full_name ?? 'Staff';
+      if (req.duration === 'permission') {
+        push(req.start_date, { name, kind: 'permission', detail: `Permission ${formatTimeOfDay(req.permission_from)}–${formatTimeOfDay(req.permission_to)}` });
+      } else {
+        for (const d of eachDateInRange(new Date(`${req.start_date}T00:00:00`), new Date(`${req.end_date}T00:00:00`))) {
+          push(toDateStr(d), { name, kind: 'leave', detail: `${req.leave_type_code} leave${req.duration === 'half' ? ` (${req.half_session})` : ''}` });
+        }
+      }
+    }
+
+    return map;
+  }, [scopedRoster, scopedPeriodDays, scopedApprovedLeave]);
 
   const filtered = scopedRoster.filter((r) => r.profile.full_name.toLowerCase().includes(query.trim().toLowerCase()));
 
@@ -183,6 +319,7 @@ export function Team() {
       <div className="seg" style={{ marginBottom: 18 }}>
         <button className="seg-opt" data-active={tab === 'roster'} onClick={() => setTab('roster')}>Roster</button>
         <button className="seg-opt" data-active={tab === 'analytics'} onClick={() => setTab('analytics')}>Analytics</button>
+        <button className="seg-opt" data-active={tab === 'calendar'} onClick={() => setTab('calendar')}>Calendar</button>
       </div>
 
       {tab === 'roster' && (
@@ -273,6 +410,46 @@ export function Team() {
                 ))}
               </div>
             </>
+          )}
+        </>
+      )}
+
+      {tab === 'calendar' && (
+        <>
+          <div className="seg" style={{ marginBottom: 14 }}>
+            <button className="seg-opt" data-active={period === 'day'} onClick={() => setPeriod('day')}>Day</button>
+            <button className="seg-opt" data-active={period === 'week'} onClick={() => setPeriod('week')}>Week</button>
+            <button className="seg-opt" data-active={period === 'month'} onClick={() => setPeriod('month')}>Month</button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <span style={{ fontWeight: 800, fontSize: 14 }}>{periodLabel(period, anchor)}</span>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className="icon-btn card" style={{ padding: '4px 8px', boxShadow: 'none', border: '1px solid var(--color-divider)' }} onClick={() => goPeriod(-1)}>
+                <ChevronLeftIcon />
+              </button>
+              <button className="icon-btn card" style={{ padding: '4px 8px', boxShadow: 'none', border: '1px solid var(--color-divider)' }} onClick={() => goPeriod(1)}>
+                <ChevronRightIcon />
+              </button>
+            </div>
+          </div>
+
+          {period === 'day' && (
+            <ExceptionList items={exceptionsByDate.get(toDateStr(anchor)) ?? []} />
+          )}
+
+          {period === 'week' && eachDateInRange(startOfWeek(anchor), addDays(startOfWeek(anchor), 6)).map((d) => {
+            const dateStr = toDateStr(d);
+            return <ExceptionList key={dateStr} label={formatDayHeader(d)} items={exceptionsByDate.get(dateStr) ?? []} />;
+          })}
+
+          {period === 'month' && (
+            <MonthExceptionCalendar
+              anchor={anchor}
+              exceptionsByDate={exceptionsByDate}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+            />
           )}
         </>
       )}

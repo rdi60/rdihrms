@@ -87,6 +87,14 @@ export function eachDateInRange(start: Date, end: Date): Date[] {
   return dates;
 }
 
+export function formatTimeOfDay(hms: string | null): string {
+  if (!hms) return '—';
+  const [h, m] = hms.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
 export function formatWeekRange(start: Date, end: Date): string {
   const startLabel = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   const endLabel = end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });

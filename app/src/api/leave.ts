@@ -32,6 +32,18 @@ export async function listPendingApprovals(): Promise<LeaveRequest[]> {
   return data ?? [];
 }
 
+export async function listApprovedLeaveOverlapping(start: string, end: string): Promise<LeaveRequest[]> {
+  const { data, error } = await supabase
+    .from('leave_requests')
+    .select('*, profiles!leave_requests_profile_id_fkey(full_name)')
+    .eq('status', 'approved')
+    .lte('start_date', end)
+    .gte('end_date', start)
+    .order('start_date', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export interface NewLeaveRequest {
   profileId: string;
   leaveType: LeaveTypeCode;
