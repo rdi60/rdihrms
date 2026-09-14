@@ -24,6 +24,7 @@ import { BulkHolidays } from './pages/BulkHolidays';
 import { BulkStaffDates } from './pages/BulkStaffDates';
 import { BulkStaffPhotos } from './pages/BulkStaffPhotos';
 import { PayrollReport } from './pages/PayrollReport';
+import { PunchReport } from './pages/PunchReport';
 import { ChangePassword } from './pages/ChangePassword';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
@@ -148,6 +149,14 @@ export function App() {
           element={
             <AdminRoute>
               <PayrollReport />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="profile/punch-report"
+          element={
+            <AdminRoute>
+              <PunchReport />
             </AdminRoute>
           }
         />

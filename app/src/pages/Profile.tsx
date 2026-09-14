@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Avatar } from '../components/Avatar';
 import {
   BellIcon, LockIcon, GlobeIcon, HelpIcon, CalendarIcon, AwardIcon, GiftIcon, DownloadIcon,
-  ChevronRightIcon, LogOutIcon, UsersIcon, UserIcon,
+  ChevronRightIcon, LogOutIcon, UsersIcon, UserIcon, ClockIcon,
 } from '../icons';
 
 const CHANGE_PASSWORD_ITEM = { to: '/profile/change-password', label: 'Change password', Icon: LockIcon };
@@ -20,6 +20,7 @@ const ADMIN_ITEMS = [
   { to: '/profile/departments', label: 'Departments', Icon: UsersIcon },
   { to: '/profile/staff', label: 'Staff', Icon: UsersIcon },
   { to: '/profile/payroll-report', label: 'Payroll report', Icon: DownloadIcon },
+  { to: '/profile/punch-report', label: 'Punch report', Icon: ClockIcon },
   { to: '/profile/holidays/bulk', label: 'Bulk upload holidays', Icon: CalendarIcon },
   { to: '/profile/staff-dates/bulk', label: 'Bulk upload birthdays & anniversaries', Icon: GiftIcon },
   { to: '/profile/staff-photos/bulk', label: 'Bulk upload staff photos', Icon: UserIcon },
