@@ -30,6 +30,12 @@ function roleLabel(role: string) {
   return 'Staff';
 }
 
+function roleTag(role: string) {
+  if (role === 'admin') return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)' };
+  if (role === 'manager') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)' };
+  return null;
+}
+
 const SETTINGS_ITEMS = [
   { label: 'Notifications', Icon: BellIcon },
   { label: 'Language', Icon: GlobeIcon },
@@ -55,6 +61,7 @@ function RowLink({ to, label, Icon, last }: { to: string; label: string; Icon: (
 export function Profile() {
   const { profile, signOut } = useAuth();
   if (!profile) return null;
+  const tag = roleTag(profile.role);
 
   return (
     <>
@@ -66,8 +73,11 @@ export function Profile() {
 
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 18, marginBottom: 22 }}>
         <Avatar profile={profile} size={56} variant="gradient" />
-        <div>
-          <div style={{ fontWeight: 800, fontSize: 18 }}>{profile.full_name}</div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontWeight: 800, fontSize: 18 }}>{profile.full_name}</div>
+            {tag && <span className="tag" style={{ background: tag.bg, color: tag.color }}>{roleLabel(profile.role)}</span>}
+          </div>
           <div style={{ fontSize: 13, color: 'var(--color-neutral-700)' }}>
             {profile.job_title ?? roleLabel(profile.role)} · Employee #{profile.employee_code}
           </div>
