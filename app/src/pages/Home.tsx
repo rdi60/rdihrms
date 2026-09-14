@@ -49,9 +49,12 @@ export function Home() {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6, marginBottom: 16 }}>
-        <Brandbar />
-        <button className="icon-btn" onClick={() => navigate('/notifications')} style={{ position: 'relative', fontSize: 20 }}>
+      <div style={{ position: 'relative', paddingTop: 6, marginBottom: 16 }}>
+        <button
+          className="icon-btn"
+          onClick={() => navigate('/notifications')}
+          style={{ position: 'absolute', top: 6, right: 0, fontSize: 20 }}
+        >
           <BellIcon />
           {unread && (
             <span
@@ -62,10 +65,15 @@ export function Home() {
             />
           )}
         </button>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <Brandbar />
+        </div>
       </div>
 
-      <div className="kicker">Rajan Dental</div>
-      <h1 style={{ fontSize: 28, marginBottom: 18 }}>Attendance</h1>
+      <div style={{ textAlign: 'center' }}>
+        <div className="kicker">Rajan Dental</div>
+        <h1 style={{ fontSize: 28, marginBottom: 18 }}>Attendance</h1>
+      </div>
 
       <div className="card" style={{ background: 'var(--color-accent-gradient)', boxShadow: 'var(--shadow-accent)', padding: 20, color: '#fff7f2' }}>
         <div style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700, opacity: 0.85, marginBottom: 6 }}>
