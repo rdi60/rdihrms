@@ -94,7 +94,7 @@ export async function clearWeeklyOff(profileId: string, workDate: string): Promi
 export async function listTodayRoster(): Promise<
   { profile: Profile; today: AttendanceDay | null }[]
 > {
-  const { data: profiles, error } = await supabase.from('profiles').select('*').order('full_name');
+  const { data: profiles, error } = await supabase.from('profiles').select('*').order('employee_code');
   if (error) throw error;
   const { data: today } = await supabase
     .from('attendance_days')

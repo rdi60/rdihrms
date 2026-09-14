@@ -73,7 +73,7 @@ export async function getPayslipDownloadUrl(filePath: string): Promise<string> {
 }
 
 export async function listRoster(): Promise<Profile[]> {
-  const { data, error } = await supabase.from('profiles').select('*').order('full_name');
+  const { data, error } = await supabase.from('profiles').select('*').order('employee_code');
   if (error) throw error;
   return data ?? [];
 }

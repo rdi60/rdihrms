@@ -14,7 +14,7 @@ export async function createDepartment(name: string): Promise<Department> {
 }
 
 export async function listManagers(): Promise<Profile[]> {
-  const { data, error } = await supabase.from('profiles').select('*').eq('role', 'manager').order('full_name');
+  const { data, error } = await supabase.from('profiles').select('*').eq('role', 'manager').order('employee_code');
   if (error) throw error;
   return data ?? [];
 }

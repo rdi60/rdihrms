@@ -83,6 +83,6 @@ export async function buildPayrollReport(
     }
   }
 
-  const rows = Array.from(byProfile.values()).sort((a, b) => a.fullName.localeCompare(b.fullName));
+  const rows = Array.from(byProfile.values()).sort((a, b) => a.employeeCode.localeCompare(b.employeeCode));
   return { rows, leaveTypeCodes };
 }
