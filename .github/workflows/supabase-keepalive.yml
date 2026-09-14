@@ -1,0 +1,21 @@
+name: Supabase keep-alive
+
+# Pings Supabase daily so the free-tier project never sees 7 days of
+# inactivity and never auto-pauses. Requires a repository secret named
+# SUPABASE_ANON_KEY (Settings -> Secrets and variables -> Actions).
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -sS -o /dev/null -w "HTTP %{http_code}\n" \
+            "https://ktdxklzblhgxgeuwpczj.supabase.co/rest/v1/departments?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
