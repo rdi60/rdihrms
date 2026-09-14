@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { compareEmployeeCode } from '../lib/sort';
 import type { Department, Profile } from '../types';
 
 export async function listDepartments(): Promise<Department[]> {
@@ -14,9 +15,9 @@ export async function createDepartment(name: string): Promise<Department> {
 }
 
 export async function listManagers(): Promise<Profile[]> {
-  const { data, error } = await supabase.from('profiles').select('*').eq('role', 'manager').order('employee_code');
+  const { data, error } = await supabase.from('profiles').select('*').eq('role', 'manager');
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).sort((a, b) => compareEmployeeCode(a.employee_code, b.employee_code));
 }
 
 /** Department ids the current signed-in manager is responsible for. Empty means unscoped (sees everyone). */

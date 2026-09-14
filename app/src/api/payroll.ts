@@ -3,6 +3,7 @@ import { listApprovedLeaveOverlapping, listLeaveTypes } from './leave';
 import { listDepartments } from './departments';
 import { listRoster } from './directory';
 import { eachDateInRange, toDateStr } from '../lib/dates';
+import { compareEmployeeCode } from '../lib/sort';
 
 export interface PayrollRow {
   employeeCode: string;
@@ -83,6 +84,6 @@ export async function buildPayrollReport(
     }
   }
 
-  const rows = Array.from(byProfile.values()).sort((a, b) => a.employeeCode.localeCompare(b.employeeCode));
+  const rows = Array.from(byProfile.values()).sort((a, b) => compareEmployeeCode(a.employeeCode, b.employeeCode));
   return { rows, leaveTypeCodes };
 }

@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { todayStr } from '../lib/dates';
+import { compareEmployeeCode } from '../lib/sort';
 import type { Holiday, Payslip, Profile } from '../types';
 
 export async function listUpcomingHolidays(): Promise<Holiday[]> {
@@ -73,7 +74,7 @@ export async function getPayslipDownloadUrl(filePath: string): Promise<string> {
 }
 
 export async function listRoster(): Promise<Profile[]> {
-  const { data, error } = await supabase.from('profiles').select('*').order('employee_code');
+  const { data, error } = await supabase.from('profiles').select('*');
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).sort((a, b) => compareEmployeeCode(a.employee_code, b.employee_code));
 }
