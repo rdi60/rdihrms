@@ -6,7 +6,7 @@
 
 .PARAMETER SinceDate
   Only sync AttendanceLogs rows on or after this date. Defaults to 60 days
-  ago. Safe to re-run with an overlapping range — existing rows for the same
+  ago. Safe to re-run with an overlapping range - existing rows for the same
   staff member + date are overwritten, not duplicated.
 
 .PARAMETER DryRun
@@ -38,7 +38,7 @@ foreach ($required in 'SqlServer', 'SqlDatabase', 'SupabaseUrl', 'SupabaseServic
   }
 }
 
-# ── SQL Server: read punch records ─────────────────────────────────────────
+# -- SQL Server: read punch records -----------------------------------------
 
 if ($SqlUseWindowsAuth) {
   $connString = "Server=$SqlServer;Database=$SqlDatabase;Integrated Security=True;TrustServerCertificate=True;"
@@ -88,10 +88,10 @@ $reader.Close()
 $connection.Close()
 Write-Host "Read $($rows.Count) attendance rows from SQL Server."
 
-# ── Helpers ─────────────────────────────────────────────────────────────────
+# -- Helpers -----------------------------------------------------------------
 
 # eSSL stores "no punch" as 1900-01-01 00:00:00, and encodes a real punch's
-# time-of-day on that same placeholder date — so a real punch is any value
+# time-of-day on that same placeholder date - so a real punch is any value
 # other than exactly midnight on 1900-01-01. We take its time-of-day and
 # apply it to the real AttendanceDate, in India Standard Time (+05:30).
 function Get-ClockTimestamp {
@@ -116,7 +116,7 @@ function Get-DayStatus {
   return 'absent'
 }
 
-# ── Supabase: map employee codes to profile ids ─────────────────────────────
+# -- Supabase: map employee codes to profile ids -----------------------------
 
 $headers = @{
   apikey        = $SupabaseServiceRoleKey
@@ -133,7 +133,7 @@ foreach ($p in $profiles) {
 }
 Write-Host "Loaded $($codeToId.Count) staff profiles."
 
-# ── Build the upsert payload ────────────────────────────────────────────────
+# -- Build the upsert payload ------------------------------------------------
 
 $payload = New-Object System.Collections.Generic.List[object]
 $unmatchedCodes = @{}
@@ -160,7 +160,7 @@ Write-Host "Matched $($payload.Count) rows to a staff profile."
 if ($unmatchedCodes.Count -gt 0) {
   Write-Warning "These EmployeeCode values from AttendanceLogs have no matching profiles.employee_code in Supabase (skipped):"
   foreach ($k in $unmatchedCodes.Keys) {
-    Write-Warning "  '$k' — $($unmatchedCodes[$k]) row(s)"
+    Write-Warning "  '$k' - $($unmatchedCodes[$k]) row(s)"
   }
   Write-Warning "Fix these by setting the matching profile's employee_code in Supabase's Table Editor, then re-run."
 }
@@ -176,7 +176,7 @@ if ($payload.Count -eq 0) {
   exit 0
 }
 
-# ── Push to Supabase in batches ─────────────────────────────────────────────
+# -- Push to Supabase in batches ---------------------------------------------
 
 $upsertHeaders = $headers.Clone()
 $upsertHeaders['Prefer'] = 'resolution=merge-duplicates,return=minimal'

@@ -1,5 +1,5 @@
 # Copy this file to config.ps1 in this same folder and fill in your real values.
-# config.ps1 is gitignored — it holds real credentials and must never be committed
+# config.ps1 is gitignored - it holds real credentials and must never be committed
 # or shared. This example file has no secrets in it and is safe to keep in git.
 
 # --- SQL Server: the local eSSL / biometric attendance database ---
@@ -12,7 +12,7 @@ $SqlDatabase = 'YourDatabaseName'
 # you use SSMS on, under the same Windows login that can already open the DB).
 $SqlUseWindowsAuth = $true
 
-# Only used if $SqlUseWindowsAuth is $false — a SQL Server login instead.
+# Only used if $SqlUseWindowsAuth is $false - a SQL Server login instead.
 $SqlUser = ''
 $SqlPassword = ''
 
