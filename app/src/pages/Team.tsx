@@ -3,11 +3,15 @@ import { listAttendanceRange, listTodayRoster } from '../api/attendance';
 import { listPendingApprovals } from '../api/leave';
 import { listMyManagedDepartmentIds } from '../api/departments';
 import { useAuth } from '../context/AuthContext';
-import { addDays, startOfWeek, toDateStr } from '../lib/dates';
-import { SearchIcon } from '../icons';
+import {
+  addDays, addMonths, eachDateInRange, endOfMonth, formatDayHeader, formatWeekRange,
+  monthLabel, startOfMonth, startOfWeek, toDateStr,
+} from '../lib/dates';
+import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '../icons';
 import type { AttendanceDay, Profile } from '../types';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+type Period = 'day' | 'week' | 'month';
 
 function tagStyle(status: string) {
   if (status === 'Present') return { bg: '#f8f4f4', color: '#444141' };
@@ -23,61 +27,91 @@ function statusLabel(a: AttendanceDay | null): string {
   return 'Present';
 }
 
+function periodRange(period: Period, anchor: Date): { start: Date; end: Date } {
+  if (period === 'day') return { start: anchor, end: anchor };
+  if (period === 'week') {
+    const start = startOfWeek(anchor);
+    return { start, end: addDays(start, 6) };
+  }
+  return { start: startOfMonth(anchor), end: endOfMonth(anchor) };
+}
+
+function periodLabel(period: Period, anchor: Date): string {
+  if (period === 'day') return formatDayHeader(anchor);
+  if (period === 'week') {
+    const start = startOfWeek(anchor);
+    return formatWeekRange(start, addDays(start, 6));
+  }
+  return monthLabel(anchor.getFullYear(), anchor.getMonth());
+}
+
 export function Team() {
   const { profile } = useAuth();
   const [tab, setTab] = useState<'roster' | 'analytics'>('roster');
   const [query, setQuery] = useState('');
   const [roster, setRoster] = useState<{ profile: Profile; today: AttendanceDay | null }[]>([]);
-  const [weekDays, setWeekDays] = useState<AttendanceDay[]>([]);
   const [openLeave, setOpenLeave] = useState(0);
   const [scopedDeptIds, setScopedDeptIds] = useState<string[]>([]);
+
+  const [period, setPeriod] = useState<Period>('week');
+  const [anchor, setAnchor] = useState(new Date());
+  const [periodDays, setPeriodDays] = useState<AttendanceDay[]>([]);
 
   useEffect(() => {
     if (!profile) return;
     listTodayRoster().then(setRoster);
     listPendingApprovals().then((r) => setOpenLeave(r.length));
     listMyManagedDepartmentIds(profile.id).then(setScopedDeptIds);
-    const monday = startOfWeek(new Date());
-    listAttendanceRange(toDateStr(monday), toDateStr(addDays(monday, 6))).then(setWeekDays);
   }, [profile]);
+
+  useEffect(() => {
+    const { start, end } = periodRange(period, anchor);
+    listAttendanceRange(toDateStr(start), toDateStr(end)).then(setPeriodDays);
+  }, [period, anchor]);
 
   // A manager assigned to no department is unscoped and sees everyone.
   const scopedRoster = scopedDeptIds.length === 0
     ? roster
     : roster.filter((r) => r.profile.department_id && scopedDeptIds.includes(r.profile.department_id));
   const scopedProfileIds = new Set(scopedRoster.map((r) => r.profile.id));
-  const scopedWeekDays = scopedDeptIds.length === 0 ? weekDays : weekDays.filter((d) => scopedProfileIds.has(d.profile_id));
+  const scopedPeriodDays = scopedDeptIds.length === 0 ? periodDays : periodDays.filter((d) => scopedProfileIds.has(d.profile_id));
 
   const filtered = scopedRoster.filter((r) => r.profile.full_name.toLowerCase().includes(query.trim().toLowerCase()));
 
+  const goPeriod = (delta: number) => {
+    setAnchor((prev) => {
+      if (period === 'day') return addDays(prev, delta);
+      if (period === 'week') return addDays(prev, delta * 7);
+      return addMonths(prev, delta);
+    });
+  };
+
   const stats = useMemo(() => {
-    const roster = scopedRoster;
-    const weekDays = scopedWeekDays;
-    const total = roster.length || 1;
-    const monday = startOfWeek(new Date());
+    const total = scopedRoster.length || 1;
+    const { start, end } = periodRange(period, anchor);
     const byDate = new Map<string, AttendanceDay[]>();
-    for (const d of weekDays) {
+    for (const d of scopedPeriodDays) {
       const list = byDate.get(d.work_date) ?? [];
       list.push(d);
       byDate.set(d.work_date, list);
     }
-    const shiftByProfile = new Map(roster.map((r) => [r.profile.id, r.profile.shift_start]));
+    const shiftByProfile = new Map(scopedRoster.map((r) => [r.profile.id, r.profile.shift_start]));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    const weekBars = WEEKDAY_LABELS.map((label, i) => {
-      const dateStr = toDateStr(addDays(monday, i));
-      const records = byDate.get(dateStr) ?? [];
-      const isFuture = new Date(dateStr) > new Date();
+    // Attendance rate: average of (attended / total) across each non-future day in range.
+    const consideredDates = eachDateInRange(start, end).filter((d) => d <= today);
+    const dailyPct = consideredDates.map((d) => {
+      const records = byDate.get(toDateStr(d)) ?? [];
       const attended = records.filter((r) => r.status === 'present' || r.status === 'late').length;
-      const pct = isFuture ? 0 : Math.round((attended / total) * 100);
-      return { day: label, pct, isFuture };
+      return Math.round((attended / total) * 100);
     });
-    const countedDays = weekBars.filter((w) => !w.isFuture).length;
-    const attendanceRate = countedDays ? Math.round(weekBars.reduce((a, b) => a + b.pct, 0) / countedDays) : 0;
+    const attendanceRate = dailyPct.length ? Math.round(dailyPct.reduce((a, b) => a + b, 0) / dailyPct.length) : 0;
 
     let presentCount = 0;
     let lateCount = 0;
     let lateMinutesSum = 0;
-    for (const r of weekDays) {
+    for (const r of scopedPeriodDays) {
       if (r.status === 'present') presentCount++;
       if (r.status === 'late') {
         lateCount++;
@@ -93,8 +127,50 @@ export function Team() {
     const onTimeRate = presentCount + lateCount ? Math.round((presentCount / (presentCount + lateCount)) * 100) : 0;
     const avgLateBy = lateCount ? Math.round(lateMinutesSum / lateCount) : 0;
 
-    return { attendanceRate, onTimeRate, avgLateBy, weekBars };
-  }, [scopedRoster, scopedWeekDays]);
+    // Week view: one bar per weekday. Month view: one bar per calendar week in the month.
+    let bars: { label: string; pct: number }[] = [];
+    if (period === 'week') {
+      bars = WEEKDAY_LABELS.map((label, i) => {
+        const d = addDays(start, i);
+        if (d > today) return { label, pct: 0 };
+        const records = byDate.get(toDateStr(d)) ?? [];
+        const attended = records.filter((r) => r.status === 'present' || r.status === 'late').length;
+        return { label, pct: Math.round((attended / total) * 100) };
+      });
+    } else if (period === 'month') {
+      let weekStart = startOfWeek(start);
+      let weekIndex = 1;
+      while (weekStart <= end) {
+        const weekEnd = addDays(weekStart, 6);
+        const daysInMonth = eachDateInRange(weekStart, weekEnd).filter((d) => d >= start && d <= end && d <= today);
+        let sum = 0;
+        for (const d of daysInMonth) {
+          const records = byDate.get(toDateStr(d)) ?? [];
+          sum += records.filter((r) => r.status === 'present' || r.status === 'late').length;
+        }
+        const pct = daysInMonth.length ? Math.round((sum / (daysInMonth.length * total)) * 100) : 0;
+        bars.push({ label: `W${weekIndex}`, pct });
+        weekStart = addDays(weekStart, 7);
+        weekIndex++;
+      }
+    }
+
+    // Day view: a status breakdown instead of bars.
+    let dayBreakdown: { present: number; late: number; leave: number; absent: number } | null = null;
+    if (period === 'day') {
+      const byProfile = new Map(scopedPeriodDays.map((d) => [d.profile_id, d]));
+      let present = 0, late = 0, leave = 0;
+      for (const r of scopedRoster) {
+        const rec = byProfile.get(r.profile.id);
+        if (rec?.status === 'present') present++;
+        else if (rec?.status === 'late') late++;
+        else if (rec?.status === 'leave') leave++;
+      }
+      dayBreakdown = { present, late, leave, absent: Math.max(scopedRoster.length - present - late - leave, 0) };
+    }
+
+    return { attendanceRate, onTimeRate, avgLateBy, bars, dayBreakdown };
+  }, [scopedRoster, scopedPeriodDays, period, anchor]);
 
   return (
     <>
@@ -148,6 +224,24 @@ export function Team() {
 
       {tab === 'analytics' && (
         <>
+          <div className="seg" style={{ marginBottom: 14 }}>
+            <button className="seg-opt" data-active={period === 'day'} onClick={() => setPeriod('day')}>Day</button>
+            <button className="seg-opt" data-active={period === 'week'} onClick={() => setPeriod('week')}>Week</button>
+            <button className="seg-opt" data-active={period === 'month'} onClick={() => setPeriod('month')}>Month</button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <span style={{ fontWeight: 800, fontSize: 14 }}>{periodLabel(period, anchor)}</span>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button className="icon-btn" style={{ border: '1px solid var(--color-divider)', padding: '4px 8px' }} onClick={() => goPeriod(-1)}>
+                <ChevronLeftIcon />
+              </button>
+              <button className="icon-btn" style={{ border: '1px solid var(--color-divider)', padding: '4px 8px' }} onClick={() => goPeriod(1)}>
+                <ChevronRightIcon />
+              </button>
+            </div>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, background: 'var(--color-divider)', marginBottom: 18 }}>
             <Stat label="Attendance rate" value={`${stats.attendanceRate}%`} />
             <Stat label="On-time rate" value={`${stats.onTimeRate}%`} />
@@ -155,15 +249,31 @@ export function Team() {
             <Stat label="Open leave" value={String(openLeave)} />
           </div>
 
-          <div className="section-label" style={{ marginBottom: 10 }}>This week</div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 110, marginBottom: 6 }}>
-            {stats.weekBars.map((w) => (
-              <div key={w.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: 6 }}>
-                <div style={{ width: '100%', background: 'var(--color-accent)', height: `${w.pct}%` }} />
-                <span style={{ fontSize: 10, color: 'var(--color-neutral-700)' }}>{w.day}</span>
+          {period === 'day' && stats.dayBreakdown && (
+            <>
+              <div className="section-label" style={{ marginBottom: 10 }}>Status breakdown</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 2, background: 'var(--color-divider)' }}>
+                <Stat label="Present" value={String(stats.dayBreakdown.present)} />
+                <Stat label="Late" value={String(stats.dayBreakdown.late)} />
+                <Stat label="On leave" value={String(stats.dayBreakdown.leave)} />
+                <Stat label="Absent" value={String(stats.dayBreakdown.absent)} />
               </div>
-            ))}
-          </div>
+            </>
+          )}
+
+          {period !== 'day' && (
+            <>
+              <div className="section-label" style={{ marginBottom: 10 }}>{period === 'week' ? 'This week' : 'This month'}</div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 110, marginBottom: 6 }}>
+                {stats.bars.map((w) => (
+                  <div key={w.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: 6 }}>
+                    <div style={{ width: '100%', background: 'var(--color-accent)', height: `${w.pct}%` }} />
+                    <span style={{ fontSize: 10, color: 'var(--color-neutral-700)' }}>{w.label}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
     </>

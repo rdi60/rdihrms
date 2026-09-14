@@ -1,6 +1,45 @@
 import { supabase } from '../lib/supabase';
 import type { Role } from '../types';
 
+export interface NewStaffInput {
+  email: string;
+  password: string;
+  fullName: string;
+  employeeCode: string;
+  role: 'staff' | 'manager';
+  departmentId: string | null;
+}
+
+export async function createStaff(input: NewStaffInput): Promise<void> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) throw new Error('Not signed in.');
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const res = await fetch(`${supabaseUrl}/functions/v1/admin-create-staff`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+      apikey: anonKey,
+    },
+    body: JSON.stringify({
+      email: input.email,
+      password: input.password,
+      full_name: input.fullName,
+      employee_code: input.employeeCode,
+      role: input.role,
+      department_id: input.departmentId,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `Could not create the account (${res.status}).`);
+  }
+}
+
 export async function setProfileRole(profileId: string, role: Role): Promise<void> {
   const { error } = await supabase.from('profiles').update({ role }).eq('id', profileId);
   if (error) throw error;

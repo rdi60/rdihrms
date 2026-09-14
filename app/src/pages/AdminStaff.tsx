@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { setProfileActive, setProfileRole } from '../api/admin';
 import { listRoster } from '../api/directory';
-import { SearchIcon } from '../icons';
+import { PlusIcon, SearchIcon } from '../icons';
 import type { Profile } from '../types';
 
 function roleTag(role: Profile['role']) {
@@ -12,6 +13,7 @@ function roleTag(role: Profile['role']) {
 }
 
 export function AdminStaff() {
+  const navigate = useNavigate();
   const { profile: me } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [query, setQuery] = useState('');
@@ -49,9 +51,14 @@ export function AdminStaff() {
 
   return (
     <>
-      <div style={{ paddingTop: 6 }}>
-        <div className="kicker">Admin</div>
-        <h1 style={{ fontSize: 28 }}>Staff</h1>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', paddingTop: 6 }}>
+        <div>
+          <div className="kicker">Admin</div>
+          <h1 style={{ fontSize: 28 }}>Staff</h1>
+        </div>
+        <button className="icon-btn" onClick={() => navigate('/profile/staff/new')} style={{ gap: 5, color: 'var(--color-accent-700)', fontWeight: 800, fontSize: 13 }}>
+          <span style={{ fontSize: 16, display: 'flex' }}><PlusIcon /></span>New
+        </button>
       </div>
       <div className="hr" style={{ margin: '16px 0 18px' }} />
 

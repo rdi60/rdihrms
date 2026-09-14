@@ -5,6 +5,8 @@ import {
   ChevronRightIcon, LogOutIcon, UsersIcon,
 } from '../icons';
 
+const CHANGE_PASSWORD_ITEM = { to: '/profile/change-password', label: 'Change password', Icon: LockIcon };
+
 const COMPANY_ITEMS = [
   { to: '/profile/holidays', label: 'Public holidays', Icon: CalendarIcon },
   { to: '/profile/anniversaries', label: 'Work anniversaries', Icon: AwardIcon },
@@ -25,7 +27,6 @@ function roleLabel(role: string) {
 
 const SETTINGS_ITEMS = [
   { label: 'Notifications', Icon: BellIcon },
-  { label: 'Change password', Icon: LockIcon },
   { label: 'Language', Icon: GlobeIcon },
   { label: 'Help & support', Icon: HelpIcon },
 ];
@@ -78,6 +79,14 @@ export function Profile() {
       )}
 
       <div className="section-label" style={{ margin: '20px 0 8px' }}>Settings</div>
+      <Link
+        to={CHANGE_PASSWORD_ITEM.to}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 0', borderBottom: '1px solid var(--color-divider)', textDecoration: 'none', color: 'inherit' }}
+      >
+        <span style={{ fontSize: 16, color: 'var(--color-neutral-700)', display: 'flex' }}><CHANGE_PASSWORD_ITEM.Icon /></span>
+        <span style={{ flex: 1, fontSize: 14, color: 'var(--color-text)' }}>{CHANGE_PASSWORD_ITEM.label}</span>
+        <span style={{ fontSize: 14, color: 'var(--color-neutral-500)', display: 'flex' }}><ChevronRightIcon /></span>
+      </Link>
       {SETTINGS_ITEMS.map(({ label, Icon }) => (
         <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 0', borderBottom: '1px solid var(--color-divider)' }}>
           <span style={{ fontSize: 16, color: 'var(--color-neutral-700)', display: 'flex' }}><Icon /></span>

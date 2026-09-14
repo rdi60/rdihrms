@@ -16,6 +16,8 @@ import { Payslips } from './pages/Payslips';
 import { Departments } from './pages/Departments';
 import { DepartmentDetail } from './pages/DepartmentDetail';
 import { AdminStaff } from './pages/AdminStaff';
+import { AddStaff } from './pages/AddStaff';
+import { ChangePassword } from './pages/ChangePassword';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
   const { profile } = useAuth();
@@ -78,6 +80,15 @@ export function App() {
             </AdminRoute>
           }
         />
+        <Route
+          path="profile/staff/new"
+          element={
+            <AdminRoute>
+              <AddStaff />
+            </AdminRoute>
+          }
+        />
+        <Route path="profile/change-password" element={<ChangePassword />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
