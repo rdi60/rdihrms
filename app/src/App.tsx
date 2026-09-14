@@ -20,6 +20,8 @@ import { AddStaff } from './pages/AddStaff';
 import { StaffLeaveBalances } from './pages/StaffLeaveBalances';
 import { BulkAddStaff } from './pages/BulkAddStaff';
 import { BulkLeaveBalances } from './pages/BulkLeaveBalances';
+import { BulkHolidays } from './pages/BulkHolidays';
+import { BulkStaffDates } from './pages/BulkStaffDates';
 import { ChangePassword } from './pages/ChangePassword';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
@@ -112,6 +114,22 @@ export function App() {
           element={
             <AdminRoute>
               <BulkLeaveBalances />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="profile/holidays/bulk"
+          element={
+            <AdminRoute>
+              <BulkHolidays />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="profile/staff-dates/bulk"
+          element={
+            <AdminRoute>
+              <BulkStaffDates />
             </AdminRoute>
           }
         />

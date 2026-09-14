@@ -14,6 +14,13 @@ export async function listUpcomingHolidays(): Promise<Holiday[]> {
   return data ?? [];
 }
 
+export async function upsertHoliday(holidayDate: string, name: string): Promise<void> {
+  const { error } = await supabase
+    .from('holidays')
+    .upsert({ holiday_date: holidayDate, name }, { onConflict: 'holiday_date' });
+  if (error) throw error;
+}
+
 export interface UpcomingPerson {
   name: string;
   date: string; // MM-DD of the anniversary this year/next

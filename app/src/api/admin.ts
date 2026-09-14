@@ -49,3 +49,15 @@ export async function setProfileActive(profileId: string, isActive: boolean): Pr
   const { error } = await supabase.from('profiles').update({ is_active: isActive }).eq('id', profileId);
   if (error) throw error;
 }
+
+export async function updateProfileDates(
+  profileId: string,
+  dates: { dateOfBirth?: string; joinDate?: string }
+): Promise<void> {
+  const patch: Record<string, string> = {};
+  if (dates.dateOfBirth) patch.date_of_birth = dates.dateOfBirth;
+  if (dates.joinDate) patch.join_date = dates.joinDate;
+  if (Object.keys(patch).length === 0) return;
+  const { error } = await supabase.from('profiles').update(patch).eq('id', profileId);
+  if (error) throw error;
+}
