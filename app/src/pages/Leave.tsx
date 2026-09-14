@@ -16,9 +16,9 @@ const LEAVE_TYPES: LeaveTypeCode[] = ['SL', 'CL', 'EL', 'Permission'];
 const BALANCE_TOTALS: Record<LeaveTypeCode, number> = { SL: 12, CL: 12, EL: 15, Permission: 4 };
 
 function tagStyle(status: LeaveStatus) {
-  if (status === 'approved') return { bg: '#f8f4f4', color: '#444141' };
-  if (status === 'pending') return { bg: 'var(--color-accent-100)', color: 'var(--color-accent-800)' };
-  return { bg: 'var(--color-accent-200)', color: 'var(--color-accent-700)' };
+  if (status === 'approved') return { bg: 'var(--status-present-bg)', color: 'var(--status-present-text)' };
+  if (status === 'pending') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)' };
+  return { bg: 'var(--status-absent-bg)', color: 'var(--status-absent-text)' };
 }
 
 export function Leave() {
@@ -128,11 +128,11 @@ export function Leave() {
       <div className="hr" style={{ margin: '16px 0 18px' }} />
 
       <div className="section-label" style={{ marginBottom: 8 }}>Balance</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 2, background: 'var(--color-divider)', marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 18 }}>
         {LEAVE_TYPES.map((code) => {
           const { avail, total } = balanceFor(code);
           return (
-            <div key={code} style={{ background: 'var(--color-surface)', padding: '12px 8px', textAlign: 'center' }}>
+            <div key={code} className="card" style={{ padding: '12px 8px', textAlign: 'center' }}>
               <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-accent-700)', marginBottom: 4 }}>
                 {code === 'Permission' ? 'Perm.' : code}
               </div>
@@ -152,7 +152,7 @@ export function Leave() {
       )}
 
       {showForm && (
-        <div style={{ background: 'var(--color-surface)', padding: 18, marginBottom: 18 }}>
+        <div className="card" style={{ padding: 18, marginBottom: 18 }}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>New request</div>
           <div className="seg" style={{ marginBottom: 14 }}>
             {LEAVE_TYPES.map((t) => (
@@ -222,9 +222,9 @@ export function Leave() {
       {(!isManager || view === 'mine') && mine.map((r) => {
         const tag = tagStyle(r.status);
         return (
-          <div key={r.id} style={{ padding: '14px 0', borderBottom: '1px solid var(--color-divider)', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div key={r.id} className="card" style={{ padding: '13px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 3 }}>{r.leave_type_code} leave</div>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 3 }}>{r.leave_type_code} leave</div>
               <div style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>
                 {formatShortDate(r.start_date)} – {formatShortDate(r.end_date)}
               </div>
@@ -237,16 +237,16 @@ export function Leave() {
       {isManager && view === 'approvals' && (
         <>
           {approvalError && (
-            <div style={{ padding: '10px 12px', marginBottom: 12, background: 'var(--color-accent-100)', color: 'var(--color-accent-800)', fontSize: 13 }}>
+            <div className="card" style={{ padding: '10px 12px', marginBottom: 12, background: 'var(--status-late-bg)', color: 'var(--status-late-text)', fontSize: 13, boxShadow: 'none' }}>
               {approvalError}
             </div>
           )}
           {approvals.map((p) => {
             const iAlreadyApproved = p.first_approved_by === profile.id;
             return (
-              <div key={p.id} style={{ padding: '14px 0', borderBottom: '1px solid var(--color-divider)' }}>
+              <div key={p.id} className="card" style={{ padding: 16, marginBottom: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>{p.profiles?.full_name}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{p.profiles?.full_name}</div>
                   <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>{p.leave_type_code}</span>
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--color-neutral-700)', marginBottom: 2 }}>
@@ -254,7 +254,7 @@ export function Leave() {
                 </div>
                 <div style={{ fontSize: 13, marginBottom: 10 }}>{p.reason}</div>
                 {p.first_approved_by && (
-                  <div style={{ fontSize: 11, color: 'var(--color-accent-700)', fontWeight: 600, marginBottom: 10 }}>
+                  <div style={{ fontSize: 11, color: 'var(--status-late-text)', fontWeight: 700, marginBottom: 10 }}>
                     {iAlreadyApproved ? 'You approved this — waiting for a second manager.' : 'Approved by one manager — needs a second approval.'}
                   </div>
                 )}
@@ -262,12 +262,12 @@ export function Leave() {
                   <button
                     className="btn"
                     disabled={iAlreadyApproved}
-                    style={{ flex: 1, background: '#201e1d', color: 'var(--color-bg)', fontSize: 12, padding: '8px 10px' }}
+                    style={{ flex: 1, background: 'var(--status-present-text)', color: '#fff', fontSize: 12, padding: '9px 10px', boxShadow: 'none' }}
                     onClick={() => onApprove(p.id)}
                   >
                     <CheckIcon /> Approve
                   </button>
-                  <button className="btn btn-secondary" style={{ flex: 1, fontSize: 12, padding: '8px 10px' }} onClick={() => onReject(p.id)}>
+                  <button className="btn btn-secondary" style={{ flex: 1, fontSize: 12, padding: '9px 10px' }} onClick={() => onReject(p.id)}>
                     <XIcon /> Reject
                   </button>
                 </div>

@@ -71,28 +71,32 @@ export function Departments() {
         </form>
       )}
 
-      {departments.map((d) => {
-        const staffCount = profiles.filter((p) => p.department_id === d.id).length;
-        const mgrNames = (managerDeptIds[d.id] ?? [])
-          .map((id) => managers.find((m) => m.id === id)?.full_name)
-          .filter(Boolean)
-          .join(', ');
-        return (
-          <Link
-            key={d.id}
-            to={`/profile/departments/${d.id}`}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 0', borderBottom: '1px solid var(--color-divider)' }}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>{d.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>
-                {staffCount} staff{mgrNames ? ` · ${mgrNames}` : ' · no manager assigned'}
-              </div>
-            </div>
-            <span style={{ fontSize: 14, color: 'var(--color-neutral-500)', display: 'flex' }}><ChevronRightIcon /></span>
-          </Link>
-        );
-      })}
+      {departments.length > 0 && (
+        <div className="card">
+          {departments.map((d, i) => {
+            const staffCount = profiles.filter((p) => p.department_id === d.id).length;
+            const mgrNames = (managerDeptIds[d.id] ?? [])
+              .map((id) => managers.find((m) => m.id === id)?.full_name)
+              .filter(Boolean)
+              .join(', ');
+            return (
+              <Link
+                key={d.id}
+                to={`/profile/departments/${d.id}`}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', borderBottom: i === departments.length - 1 ? 'none' : '1px solid var(--color-divider)' }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{d.name}</div>
+                  <div style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>
+                    {staffCount} staff{mgrNames ? ` · ${mgrNames}` : ' · no manager assigned'}
+                  </div>
+                </div>
+                <span style={{ fontSize: 14, color: 'var(--color-neutral-500)', display: 'flex' }}><ChevronRightIcon /></span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
       {departments.length === 0 && !showForm && (
         <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--color-neutral-500)', fontSize: 13 }}>
           No departments yet — create one to start assigning staff and managers.

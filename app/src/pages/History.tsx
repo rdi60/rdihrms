@@ -8,21 +8,21 @@ import type { AttendanceDay, AttendanceStatus } from '../types';
 const WEEKDAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 const LEGEND: { status: AttendanceStatus; label: string; swatch: string; border?: string }[] = [
-  { status: 'present', label: 'Present', swatch: 'var(--color-surface)' },
-  { status: 'late', label: 'Late', swatch: 'var(--color-accent-200)' },
-  { status: 'absent', label: 'Absent', swatch: 'var(--color-accent)' },
-  { status: 'leave', label: 'Leave', swatch: 'transparent', border: '1.5px solid var(--color-divider)' },
+  { status: 'present', label: 'Present', swatch: 'var(--status-present-bg)' },
+  { status: 'late', label: 'Late', swatch: 'var(--status-late-bg)' },
+  { status: 'absent', label: 'Absent', swatch: 'var(--status-absent-bg)' },
+  { status: 'leave', label: 'Leave', swatch: 'var(--status-leave-bg)' },
 ];
 
 function dayStyle(status: AttendanceStatus | undefined, selected: boolean) {
-  let bg = 'var(--color-surface)';
-  let fg = 'var(--color-text)';
+  let bg = 'var(--status-present-bg)';
+  let fg = 'var(--status-present-text)';
   let border = '1px solid transparent';
-  if (status === 'late') { bg = 'var(--color-accent-200)'; fg = 'var(--color-accent-800)'; }
-  else if (status === 'absent') { bg = 'var(--color-accent)'; fg = 'var(--color-bg)'; }
-  else if (status === 'leave') { bg = 'var(--color-bg)'; border = '1.5px solid var(--color-divider)'; }
-  else if (status === 'weekend') { bg = 'transparent'; fg = 'var(--color-neutral-500)'; }
-  if (selected) border = '2px solid var(--color-accent-700)';
+  if (status === 'late') { bg = 'var(--status-late-bg)'; fg = 'var(--status-late-text)'; }
+  else if (status === 'absent') { bg = 'var(--status-absent-bg)'; fg = 'var(--status-absent-text)'; }
+  else if (status === 'leave') { bg = 'var(--status-leave-bg)'; fg = 'var(--status-leave-text)'; }
+  else if (status === 'weekend') { bg = 'transparent'; fg = 'var(--color-neutral-500)'; border = '1px dashed var(--color-divider)'; }
+  if (selected) border = '2px solid var(--color-accent)';
   return { bg, fg, border };
 }
 
@@ -69,11 +69,11 @@ export function History() {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <span style={{ fontWeight: 800, fontSize: 16 }}>{monthLabel(year, month)}</span>
-        <div style={{ display: 'flex', gap: 4 }}>
-          <button className="icon-btn" style={{ border: '1px solid var(--color-divider)', padding: '4px 8px' }} onClick={() => goMonth(-1)}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button className="icon-btn card" style={{ padding: '4px 8px', boxShadow: 'none', border: '1px solid var(--color-divider)' }} onClick={() => goMonth(-1)}>
             <ChevronLeftIcon />
           </button>
-          <button className="icon-btn" style={{ border: '1px solid var(--color-divider)', padding: '4px 8px' }} onClick={() => goMonth(1)}>
+          <button className="icon-btn card" style={{ padding: '4px 8px', boxShadow: 'none', border: '1px solid var(--color-divider)' }} onClick={() => goMonth(1)}>
             <ChevronRightIcon />
           </button>
         </div>
@@ -82,7 +82,7 @@ export function History() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 1, fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-neutral-700)', marginBottom: 6, textAlign: 'center' }}>
         {WEEKDAY_LETTERS.map((l, i) => <div key={i}>{l}</div>)}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4 }}>
         {grid.map((day, i) => {
           if (day === null) return <div key={i} />;
           const record = byDay.get(day);
@@ -93,8 +93,9 @@ export function History() {
               key={i}
               onClick={() => setSelected(day)}
               style={{
-                aspectRatio: '1', background: bg, color: fg, border, fontSize: 12, fontWeight: 600,
-                cursor: 'pointer', padding: 0, fontFamily: 'inherit',
+                aspectRatio: '1', background: bg, color: fg, border, fontSize: 12, fontWeight: 700,
+                cursor: 'pointer', padding: 0, fontFamily: 'inherit', borderRadius: 'var(--radius-sm)',
+                transition: 'transform 0.15s var(--ease)',
               }}
             >
               {day}
@@ -106,14 +107,13 @@ export function History() {
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', margin: '16px 0', fontSize: 11, color: 'var(--color-neutral-700)' }}>
         {LEGEND.map((l) => (
           <span key={l.status} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ width: 9, height: 9, background: l.swatch, border: l.border, display: 'inline-block' }} />
+            <span style={{ width: 9, height: 9, borderRadius: 3, background: l.swatch, border: l.border, display: 'inline-block' }} />
             {l.label}
           </span>
         ))}
       </div>
-      <div className="hr" style={{ margin: '4px 0 16px' }} />
 
-      <div style={{ background: 'var(--color-surface)', padding: 16 }}>
+      <div className="card" style={{ padding: 16 }}>
         <div className="kicker" style={{ marginBottom: 4 }}>{formatDayLabel(selectedDateStr)}</div>
         <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 10 }}>
           {selectedRecord ? statusLabel(selectedRecord.status) : isWeekend(year, month, selected) ? 'Weekend' : 'Present'}

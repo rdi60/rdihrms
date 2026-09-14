@@ -73,7 +73,7 @@ export function DepartmentDetail() {
       <div className="section-label" style={{ marginBottom: 10 }}>Managers</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         {assignedManagers.map((m) => (
-          <span key={m.id} className="tag" style={{ background: 'var(--color-accent-100)', color: 'var(--color-accent-800)', gap: 6, alignItems: 'center', display: 'inline-flex' }}>
+          <span key={m.id} className="tag" style={{ background: 'var(--status-late-bg)', color: 'var(--status-late-text)', gap: 6, alignItems: 'center', display: 'inline-flex' }}>
             {m.full_name}
             <button onClick={() => onRemoveManager(m.id)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', color: 'inherit' }}>
               <XIcon />
@@ -107,17 +107,17 @@ export function DepartmentDetail() {
       {filteredStaff.map((p) => {
         const inThisDept = p.department_id === id;
         return (
-          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: '1px solid var(--color-divider)' }}>
+          <div key={p.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 13, marginBottom: 10 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{p.full_name}</div>
               <div style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>{p.job_title ?? p.employee_code}</div>
             </div>
             <button
-              className="btn"
+              className={inThisDept ? 'btn' : 'btn btn-secondary'}
               style={
                 inThisDept
-                  ? { background: 'var(--color-accent)', color: 'var(--color-bg)', fontSize: 12, padding: '6px 12px' }
-                  : { border: '1px solid var(--color-divider)', fontSize: 12, padding: '6px 12px' }
+                  ? { background: 'var(--color-accent-gradient)', color: '#fff7f2', fontSize: 12, padding: '7px 13px' }
+                  : { fontSize: 12, padding: '7px 13px' }
               }
               onClick={() => onToggleStaff(p)}
             >

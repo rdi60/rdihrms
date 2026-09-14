@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { LogoMark } from '../components/Logo';
 
 export function Login() {
   const { signIn } = useAuth();
@@ -20,9 +21,12 @@ export function Login() {
   return (
     <div className="app-viewport" style={{ alignItems: 'center' }}>
       <div style={{ width: '100%', maxWidth: 360, padding: '0 20px' }}>
+        <div style={{ marginBottom: 28 }}>
+          <LogoMark size={40} />
+        </div>
         <div className="kicker">Rajan Dental</div>
-        <h1 style={{ fontSize: 30, marginBottom: 24 }}>Sign in</h1>
-        <form onSubmit={onSubmit}>
+        <h1 style={{ fontSize: 28, marginBottom: 24 }}>Sign in</h1>
+        <form onSubmit={onSubmit} className="card" style={{ padding: 20 }}>
           <label style={{ display: 'block', fontSize: 11, color: 'var(--color-neutral-700)', marginBottom: 5 }}>
             Email
           </label>

@@ -5,6 +5,7 @@ import { clockIn, clockOut, getTodayAttendance, listRecentActivity } from '../ap
 import { hasUnreadNotifications } from '../api/notifications';
 import { formatTime } from '../lib/dates';
 import { BellIcon, ClockIcon, LogOutIcon, CheckCircleIcon } from '../icons';
+import { Brandbar } from '../components/Logo';
 import type { AttendanceDay } from '../types';
 
 export function Home() {
@@ -48,12 +49,9 @@ export function Home() {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', paddingTop: 6 }}>
-        <div>
-          <div className="kicker">Rajan Dental</div>
-          <h1 style={{ fontSize: 30 }}>Attendance</h1>
-        </div>
-        <button className="icon-btn" onClick={() => navigate('/notifications')} style={{ position: 'relative', fontSize: 22 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6, marginBottom: 16 }}>
+        <Brandbar />
+        <button className="icon-btn" onClick={() => navigate('/notifications')} style={{ position: 'relative', fontSize: 20 }}>
           <BellIcon />
           {unread && (
             <span
@@ -65,13 +63,15 @@ export function Home() {
           )}
         </button>
       </div>
-      <div className="hr" style={{ margin: '16px 0 20px' }} />
 
-      <div style={{ background: 'var(--color-surface)', padding: 20 }}>
-        <div className="kicker" style={{ marginBottom: 6 }}>
+      <div className="kicker">Rajan Dental</div>
+      <h1 style={{ fontSize: 28, marginBottom: 18 }}>Attendance</h1>
+
+      <div className="card" style={{ background: 'var(--color-accent-gradient)', boxShadow: 'var(--shadow-accent)', padding: 20, color: '#fff7f2' }}>
+        <div style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700, opacity: 0.85, marginBottom: 6 }}>
           {clockedIn ? 'On the clock' : 'Not clocked in'}
         </div>
-        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>
+        <div style={{ fontSize: 19, fontWeight: 800, marginBottom: 16 }}>
           {clockedIn ? `Since ${formatTime(today?.clock_in ?? null)}` : 'Ready when you are'}
         </div>
         <button
@@ -80,41 +80,47 @@ export function Home() {
           className="btn"
           style={{
             width: '100%', justifyContent: 'flex-start', gap: 10,
-            background: clockedIn ? '#201e1d' : 'var(--color-accent)', color: 'var(--color-bg)',
-            padding: '14px 16px', fontSize: 16,
+            background: '#fff', color: 'var(--color-accent-700)',
+            padding: '13px 16px', fontSize: 15, boxShadow: 'none',
           }}
         >
-          <span style={{ fontSize: 20, display: 'flex' }}>
+          <span style={{ fontSize: 19, display: 'flex' }}>
             <ClockIcon />
           </span>
           {clockedIn ? 'Clock out' : 'Clock in'}
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, marginTop: 16, background: 'var(--color-divider)' }}>
-        <div style={{ background: 'var(--color-bg)', padding: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
+        <div className="card" style={{ padding: 15 }}>
           <div className="section-label" style={{ marginBottom: 6 }}>Scheduled shift</div>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>
+          <div style={{ fontSize: 16, fontWeight: 700 }}>
             {profile.shift_start.slice(0, 5)}–{profile.shift_end.slice(0, 5)}
           </div>
         </div>
-        <div style={{ background: 'var(--color-bg)', padding: 16 }}>
+        <div className="card" style={{ padding: 15 }}>
           <div className="section-label" style={{ marginBottom: 6 }}>Weekly hours</div>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>{profile.weekly_hours}h</div>
+          <div style={{ fontSize: 16, fontWeight: 700 }}>{profile.weekly_hours}h</div>
         </div>
       </div>
 
-      <div className="section-label" style={{ margin: '24px 0 8px' }}>Recent activity</div>
+      <div className="section-label" style={{ margin: '22px 0 10px' }}>Recent activity</div>
       {recent.length === 0 && <div style={{ fontSize: 13, color: 'var(--color-neutral-700)', padding: '11px 0' }}>No activity yet.</div>}
       {recent.map((a) => (
-        <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 0', borderBottom: '1px solid var(--color-divider)' }}>
-          <span style={{ fontSize: 16, color: 'var(--color-neutral-700)', display: 'flex' }}>
+        <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 0', borderBottom: '1px solid var(--color-divider)' }}>
+          <span
+            style={{
+              fontSize: 15, color: 'var(--color-accent-700)', display: 'flex', flex: 'none',
+              width: 32, height: 32, alignItems: 'center', justifyContent: 'center',
+              background: 'var(--color-surface-tint)', borderRadius: 'var(--radius-sm)',
+            }}
+          >
             {a.clock_out ? <LogOutIcon /> : a.status === 'leave' ? <CheckCircleIcon /> : <ClockIcon />}
           </span>
-          <span style={{ flex: 1, fontSize: 14 }}>
+          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>
             {a.status === 'leave' ? 'On leave' : a.clock_out ? 'Clocked out' : 'Clocked in'}
           </span>
-          <span style={{ fontSize: 12, color: 'var(--color-neutral-500)' }}>
+          <span style={{ fontSize: 11.5, color: 'var(--color-neutral-500)' }}>
             {new Date(`${a.work_date}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           </span>
         </div>

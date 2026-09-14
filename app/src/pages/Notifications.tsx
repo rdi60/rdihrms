@@ -21,8 +21,8 @@ function NotificationGroup({ label, list, now }: { label: string; list: AppNotif
       {list.map((n) => {
         const Icon = NOTIF_ICONS[n.kind] ?? ClockIcon;
         return (
-          <div key={n.id} style={{ display: 'flex', gap: 12, padding: '14px 0', borderBottom: '1px solid var(--color-divider)' }}>
-            <div style={{ width: 34, height: 34, flex: 'none', background: 'var(--color-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-700)', fontSize: 16 }}>
+          <div key={n.id} className="card" style={{ display: 'flex', gap: 12, padding: 14, marginBottom: 10 }}>
+            <div style={{ width: 36, height: 36, flex: 'none', background: 'var(--color-surface-tint)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-700)', fontSize: 16 }}>
               <Icon />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>

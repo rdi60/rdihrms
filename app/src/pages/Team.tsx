@@ -14,10 +14,10 @@ const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 type Period = 'day' | 'week' | 'month';
 
 function tagStyle(status: string) {
-  if (status === 'Present') return { bg: '#f8f4f4', color: '#444141' };
-  if (status === 'Late') return { bg: 'var(--color-accent-100)', color: 'var(--color-accent-800)' };
-  if (status === 'Absent') return { bg: 'var(--color-accent-200)', color: 'var(--color-accent-700)' };
-  return { bg: '#eae7e7', color: 'var(--color-neutral-700)' };
+  if (status === 'Present') return { bg: 'var(--status-present-bg)', color: 'var(--status-present-text)' };
+  if (status === 'Late') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)' };
+  if (status === 'Absent') return { bg: 'var(--status-absent-bg)', color: 'var(--status-absent-text)' };
+  return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)' };
 }
 
 function statusLabel(a: AttendanceDay | null): string {
@@ -187,7 +187,7 @@ export function Team() {
 
       {tab === 'roster' && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--color-divider)', padding: '8px 10px', marginBottom: 14 }}>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', marginBottom: 14, boxShadow: 'none', border: '1px solid var(--color-divider)' }}>
             <span style={{ fontSize: 15, color: 'var(--color-neutral-700)', display: 'flex' }}><SearchIcon /></span>
             <input
               className="input"
@@ -202,12 +202,12 @@ export function Team() {
             const tag = tagStyle(status);
             const initials = profile.full_name.split(' ').map((p) => p[0]).join('');
             return (
-              <div key={profile.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--color-divider)' }}>
-                <div style={{ width: 34, height: 34, flex: 'none', background: 'var(--color-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13, color: 'var(--color-neutral-700)' }}>
+              <div key={profile.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 13, marginBottom: 10 }}>
+                <div style={{ width: 36, height: 36, flex: 'none', background: 'var(--color-surface-tint)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13, color: 'var(--color-accent-700)' }}>
                   {initials}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>{profile.full_name}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{profile.full_name}</div>
                   <div style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>{profile.job_title}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -232,17 +232,17 @@ export function Team() {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
             <span style={{ fontWeight: 800, fontSize: 14 }}>{periodLabel(period, anchor)}</span>
-            <div style={{ display: 'flex', gap: 4 }}>
-              <button className="icon-btn" style={{ border: '1px solid var(--color-divider)', padding: '4px 8px' }} onClick={() => goPeriod(-1)}>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className="icon-btn card" style={{ padding: '4px 8px', boxShadow: 'none', border: '1px solid var(--color-divider)' }} onClick={() => goPeriod(-1)}>
                 <ChevronLeftIcon />
               </button>
-              <button className="icon-btn" style={{ border: '1px solid var(--color-divider)', padding: '4px 8px' }} onClick={() => goPeriod(1)}>
+              <button className="icon-btn card" style={{ padding: '4px 8px', boxShadow: 'none', border: '1px solid var(--color-divider)' }} onClick={() => goPeriod(1)}>
                 <ChevronRightIcon />
               </button>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, background: 'var(--color-divider)', marginBottom: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
             <Stat label="Attendance rate" value={`${stats.attendanceRate}%`} />
             <Stat label="On-time rate" value={`${stats.onTimeRate}%`} />
             <Stat label="Avg. late by" value={`${stats.avgLateBy} min`} />
@@ -252,11 +252,11 @@ export function Team() {
           {period === 'day' && stats.dayBreakdown && (
             <>
               <div className="section-label" style={{ marginBottom: 10 }}>Status breakdown</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 2, background: 'var(--color-divider)' }}>
-                <Stat label="Present" value={String(stats.dayBreakdown.present)} />
-                <Stat label="Late" value={String(stats.dayBreakdown.late)} />
-                <Stat label="On leave" value={String(stats.dayBreakdown.leave)} />
-                <Stat label="Absent" value={String(stats.dayBreakdown.absent)} />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
+                <Stat label="Present" value={String(stats.dayBreakdown.present)} bg="var(--status-present-bg)" fg="var(--status-present-text)" />
+                <Stat label="Late" value={String(stats.dayBreakdown.late)} bg="var(--status-late-bg)" fg="var(--status-late-text)" />
+                <Stat label="On leave" value={String(stats.dayBreakdown.leave)} bg="var(--status-leave-bg)" fg="var(--status-leave-text)" />
+                <Stat label="Absent" value={String(stats.dayBreakdown.absent)} bg="var(--status-absent-bg)" fg="var(--status-absent-text)" />
               </div>
             </>
           )}
@@ -264,11 +264,11 @@ export function Team() {
           {period !== 'day' && (
             <>
               <div className="section-label" style={{ marginBottom: 10 }}>{period === 'week' ? 'This week' : 'This month'}</div>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 110, marginBottom: 6 }}>
+              <div className="card" style={{ padding: '16px 14px 10px', display: 'flex', alignItems: 'flex-end', gap: 8, height: 140, marginBottom: 6 }}>
                 {stats.bars.map((w) => (
                   <div key={w.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: 6 }}>
-                    <div style={{ width: '100%', background: 'var(--color-accent)', height: `${w.pct}%` }} />
-                    <span style={{ fontSize: 10, color: 'var(--color-neutral-700)' }}>{w.label}</span>
+                    <div style={{ width: '100%', background: 'var(--color-accent-gradient)', height: `${w.pct}%`, borderRadius: '6px 6px 2px 2px', minHeight: 2 }} />
+                    <span style={{ fontSize: 10, color: 'var(--color-neutral-700)', fontWeight: 600 }}>{w.label}</span>
                   </div>
                 ))}
               </div>
@@ -280,11 +280,11 @@ export function Team() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, bg, fg }: { label: string; value: string; bg?: string; fg?: string }) {
   return (
-    <div style={{ background: 'var(--color-bg)', padding: 16 }}>
-      <div className="section-label" style={{ marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 800 }}>{value}</div>
+    <div className="card" style={{ padding: 15, background: bg ?? 'var(--color-surface)', boxShadow: bg ? 'none' : 'var(--shadow-sm)' }}>
+      <div className="section-label" style={{ marginBottom: 6, color: fg ?? undefined }}>{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: fg ?? undefined }}>{value}</div>
     </div>
   );
 }
