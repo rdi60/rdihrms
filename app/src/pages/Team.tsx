@@ -8,6 +8,7 @@ import {
   formatTimeOfDay, formatWeekRange, monthGrid, monthLabel, startOfMonth, startOfWeek, toDateStr,
 } from '../lib/dates';
 import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '../icons';
+import { Avatar } from '../components/Avatar';
 import type { AttendanceDay, LeaveRequest, Profile } from '../types';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -388,12 +389,9 @@ export function Team() {
           {filtered.map(({ profile, today }) => {
             const status = statusLabel(today);
             const tag = tagStyle(status);
-            const initials = profile.full_name.split(' ').map((p) => p[0]).join('');
             return (
               <div key={profile.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 13, marginBottom: 10 }}>
-                <div style={{ width: 36, height: 36, flex: 'none', background: 'var(--color-surface-tint)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13, color: 'var(--color-accent-700)' }}>
-                  {initials}
-                </div>
+                <Avatar profile={profile} size={36} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: 14 }}>{profile.full_name}</div>
                   <div style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>{profile.job_title}</div>

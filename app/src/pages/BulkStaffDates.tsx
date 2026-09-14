@@ -7,6 +7,7 @@ import type { Profile } from '../types';
 
 interface Row {
   employeeCode: string;
+  name: string;
   dateOfBirth: string;
   joinDate: string;
   error: string | null;
@@ -21,28 +22,35 @@ export function BulkStaffDates() {
   const [rosterLookup, setRosterLookup] = useState<Map<string, Profile>>(new Map());
   const [results, setResults] = useState<Record<number, { status: RowResult; message?: string }>>({});
   const [uploading, setUploading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    const text = await file.text();
-    const roster = await listRoster();
-    const codeToProfile = new Map(roster.map((p) => [p.employee_code.toLowerCase(), p]));
+    setLoadError(null);
+    try {
+      const text = await file.text();
+      const roster = await listRoster();
+      const codeToProfile = new Map(roster.map((p) => [p.employee_code.toLowerCase(), p]));
 
-    const parsed = parseCsv(text).slice(1); // first row is the header
-    const built: Row[] = parsed.map(([employeeCode, dateOfBirth, joinDate]) => {
-      let error: string | null = null;
-      if (!employeeCode) error = 'Missing employee code';
-      else if (!codeToProfile.has(employeeCode.toLowerCase())) error = `Unknown employee code "${employeeCode}"`;
-      else if (!dateOfBirth && !joinDate) error = 'Provide at least one date';
-      else if (dateOfBirth && !DATE_RE.test(dateOfBirth)) error = 'Date of birth must be YYYY-MM-DD';
-      else if (joinDate && !DATE_RE.test(joinDate)) error = 'Join date must be YYYY-MM-DD';
-      return { employeeCode, dateOfBirth: dateOfBirth ?? '', joinDate: joinDate ?? '', error };
-    });
-    setRows(built);
-    setResults({});
-    setRosterLookup(codeToProfile);
+      const parsed = parseCsv(text).slice(1); // first row is the header
+      const built: Row[] = parsed.map(([employeeCode, dateOfBirth, joinDate]) => {
+        let error: string | null = null;
+        if (!employeeCode) error = 'Missing employee code';
+        else if (!codeToProfile.has(employeeCode.toLowerCase())) error = `Unknown employee code "${employeeCode}"`;
+        else if (!dateOfBirth && !joinDate) error = 'Provide at least one date';
+        else if (dateOfBirth && !DATE_RE.test(dateOfBirth)) error = 'Date of birth must be YYYY-MM-DD';
+        else if (joinDate && !DATE_RE.test(joinDate)) error = 'Join date must be YYYY-MM-DD';
+        const name = codeToProfile.get((employeeCode ?? '').toLowerCase())?.full_name ?? '';
+        return { employeeCode, name, dateOfBirth: dateOfBirth ?? '', joinDate: joinDate ?? '', error };
+      });
+      setRows(built);
+      setResults({});
+      setRosterLookup(codeToProfile);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Could not read that file.');
+    }
   };
 
   const onUpload = async () => {
@@ -91,6 +99,12 @@ export function BulkStaffDates() {
         <input type="file" accept=".csv" onChange={onFile} style={{ display: 'none' }} />
       </label>
 
+      {loadError && (
+        <div className="card" style={{ padding: '10px 12px', marginBottom: 14, background: 'var(--status-absent-bg)', color: 'var(--status-absent-text)', fontSize: 13, boxShadow: 'none' }}>
+          {loadError}
+        </div>
+      )}
+
       {rows.length > 0 && (
         <>
           <div className="section-label" style={{ marginBottom: 10 }}>
@@ -101,8 +115,11 @@ export function BulkStaffDates() {
             return (
               <div key={i} className="card" style={{ padding: '10px 14px', marginBottom: 8, opacity: r.error ? 0.55 : 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>
-                    {r.employeeCode}{r.dateOfBirth ? ` · DOB ${r.dateOfBirth}` : ''}{r.joinDate ? ` · Joined ${r.joinDate}` : ''}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{r.name || r.employeeCode}</div>
+                    <div style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>
+                      {r.employeeCode}{r.dateOfBirth ? ` · DOB ${r.dateOfBirth}` : ''}{r.joinDate ? ` · Joined ${r.joinDate}` : ''}
+                    </div>
                   </div>
                   {result && (
                     <span

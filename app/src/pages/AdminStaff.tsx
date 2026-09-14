@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { setProfileActive, setProfileRole } from '../api/admin';
 import { listRoster } from '../api/directory';
 import { PlusIcon, SearchIcon } from '../icons';
+import { Avatar } from '../components/Avatar';
 import type { Profile } from '../types';
 
 function roleTag(role: Profile['role']) {
@@ -88,6 +89,7 @@ export function AdminStaff() {
         return (
           <div key={p.id} className="card" style={{ padding: 14, marginBottom: 10, opacity: p.is_active ? 1 : 0.55 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <Avatar profile={p} size={36} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{p.full_name}</div>
                 <div style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>{p.job_title ?? p.employee_code}</div>

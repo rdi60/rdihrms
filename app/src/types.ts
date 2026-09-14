@@ -13,6 +13,7 @@ export interface Profile {
   weekly_hours: number;
   department_id: string | null;
   is_active: boolean;
+  avatar_path: string | null;
 }
 
 export interface Department {

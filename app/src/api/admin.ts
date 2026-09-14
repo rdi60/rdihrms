@@ -50,6 +50,22 @@ export async function setProfileActive(profileId: string, isActive: boolean): Pr
   if (error) throw error;
 }
 
+export function getAvatarUrl(path: string | null): string | null {
+  if (!path) return null;
+  return supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+}
+
+export async function uploadStaffPhoto(profileId: string, file: File): Promise<void> {
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const path = `${profileId}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
+  if (uploadError) throw uploadError;
+  const { error } = await supabase.from('profiles').update({ avatar_path: path }).eq('id', profileId);
+  if (error) throw error;
+}
+
 export async function updateProfileDates(
   profileId: string,
   dates: { dateOfBirth?: string; joinDate?: string }

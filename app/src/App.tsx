@@ -22,6 +22,7 @@ import { BulkAddStaff } from './pages/BulkAddStaff';
 import { BulkLeaveBalances } from './pages/BulkLeaveBalances';
 import { BulkHolidays } from './pages/BulkHolidays';
 import { BulkStaffDates } from './pages/BulkStaffDates';
+import { BulkStaffPhotos } from './pages/BulkStaffPhotos';
 import { ChangePassword } from './pages/ChangePassword';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
@@ -130,6 +131,14 @@ export function App() {
           element={
             <AdminRoute>
               <BulkStaffDates />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="profile/staff-photos/bulk"
+          element={
+            <AdminRoute>
+              <BulkStaffPhotos />
             </AdminRoute>
           }
         />

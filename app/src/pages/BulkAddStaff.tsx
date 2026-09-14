@@ -26,29 +26,35 @@ export function BulkAddStaff() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [results, setResults] = useState<Record<number, { status: RowResult; message?: string }>>({});
   const [uploading, setUploading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    const text = await file.text();
-    const depts = await listDepartments();
-    setDepartments(depts);
+    setLoadError(null);
+    try {
+      const text = await file.text();
+      const depts = await listDepartments();
+      setDepartments(depts);
 
-    const parsed = parseCsv(text).slice(1); // first row is the header
-    const built: Row[] = parsed.map(([fullName, email, password, employeeCode, role, departmentName]) => {
-      let error: string | null = null;
-      const normalizedRole = (role || 'staff').toLowerCase();
-      if (!fullName || !email || !password || !employeeCode) error = 'Missing a required value';
-      else if (password.length < 6) error = 'Password must be at least 6 characters';
-      else if (normalizedRole !== 'staff' && normalizedRole !== 'manager') error = 'Role must be "staff" or "manager"';
-      else if (departmentName && !depts.some((d) => d.name.toLowerCase() === departmentName.toLowerCase())) {
-        error = `Unknown department "${departmentName}"`;
-      }
-      return { fullName, email, password, employeeCode, role: normalizedRole, departmentName: departmentName ?? '', error };
-    });
-    setRows(built);
-    setResults({});
+      const parsed = parseCsv(text).slice(1); // first row is the header
+      const built: Row[] = parsed.map(([fullName, email, password, employeeCode, role, departmentName]) => {
+        let error: string | null = null;
+        const normalizedRole = (role || 'staff').toLowerCase();
+        if (!fullName || !email || !password || !employeeCode) error = 'Missing a required value';
+        else if (password.length < 6) error = 'Password must be at least 6 characters';
+        else if (normalizedRole !== 'staff' && normalizedRole !== 'manager') error = 'Role must be "staff" or "manager"';
+        else if (departmentName && !depts.some((d) => d.name.toLowerCase() === departmentName.toLowerCase())) {
+          error = `Unknown department "${departmentName}"`;
+        }
+        return { fullName, email, password, employeeCode, role: normalizedRole, departmentName: departmentName ?? '', error };
+      });
+      setRows(built);
+      setResults({});
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Could not read that file.');
+    }
   };
 
   const onUpload = async () => {
@@ -96,6 +102,12 @@ export function BulkAddStaff() {
         Choose CSV file
         <input type="file" accept=".csv" onChange={onFile} style={{ display: 'none' }} />
       </label>
+
+      {loadError && (
+        <div className="card" style={{ padding: '10px 12px', marginBottom: 14, background: 'var(--status-absent-bg)', color: 'var(--status-absent-text)', fontSize: 13, boxShadow: 'none' }}>
+          {loadError}
+        </div>
+      )}
 
       {rows.length > 0 && (
         <>

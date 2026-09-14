@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Avatar } from '../components/Avatar';
 import {
   BellIcon, LockIcon, GlobeIcon, HelpIcon, CalendarIcon, AwardIcon, GiftIcon, DownloadIcon,
-  ChevronRightIcon, LogOutIcon, UsersIcon,
+  ChevronRightIcon, LogOutIcon, UsersIcon, UserIcon,
 } from '../icons';
 
 const CHANGE_PASSWORD_ITEM = { to: '/profile/change-password', label: 'Change password', Icon: LockIcon };
@@ -20,6 +21,7 @@ const ADMIN_ITEMS = [
   { to: '/profile/staff', label: 'Staff', Icon: UsersIcon },
   { to: '/profile/holidays/bulk', label: 'Bulk upload holidays', Icon: CalendarIcon },
   { to: '/profile/staff-dates/bulk', label: 'Bulk upload birthdays & anniversaries', Icon: GiftIcon },
+  { to: '/profile/staff-photos/bulk', label: 'Bulk upload staff photos', Icon: UserIcon },
 ];
 
 function roleLabel(role: string) {
@@ -53,7 +55,6 @@ function RowLink({ to, label, Icon, last }: { to: string; label: string; Icon: (
 export function Profile() {
   const { profile, signOut } = useAuth();
   if (!profile) return null;
-  const initials = profile.full_name.split(' ').map((p) => p[0]).join('');
 
   return (
     <>
@@ -64,9 +65,7 @@ export function Profile() {
       <div className="hr" style={{ margin: '16px 0 20px' }} />
 
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 18, marginBottom: 22 }}>
-        <div style={{ width: 56, height: 56, flex: 'none', background: 'var(--color-accent-gradient)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18, color: '#fff7f2' }}>
-          {initials}
-        </div>
+        <Avatar profile={profile} size={56} variant="gradient" />
         <div>
           <div style={{ fontWeight: 800, fontSize: 18 }}>{profile.full_name}</div>
           <div style={{ fontSize: 13, color: 'var(--color-neutral-700)' }}>

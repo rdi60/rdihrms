@@ -7,6 +7,7 @@ import type { Profile } from '../types';
 
 interface Row {
   employeeCode: string;
+  name: string;
   leaveTypeCode: string;
   total: string;
   error: string | null;
@@ -19,29 +20,36 @@ export function BulkLeaveBalances() {
   const [rosterLookup, setRosterLookup] = useState<Map<string, Profile>>(new Map());
   const [results, setResults] = useState<Record<number, { status: RowResult; message?: string }>>({});
   const [uploading, setUploading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const year = new Date().getFullYear();
 
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    const text = await file.text();
-    const [roster, leaveTypes] = await Promise.all([listRoster(), listLeaveTypes()]);
-    const codeToProfile = new Map(roster.map((p) => [p.employee_code.toLowerCase(), p]));
-    const validTypes = new Set<string>(leaveTypes.map((t) => t.code));
+    setLoadError(null);
+    try {
+      const text = await file.text();
+      const [roster, leaveTypes] = await Promise.all([listRoster(), listLeaveTypes()]);
+      const codeToProfile = new Map(roster.map((p) => [p.employee_code.toLowerCase(), p]));
+      const validTypes = new Set<string>(leaveTypes.map((t) => t.code));
 
-    const parsed = parseCsv(text).slice(1); // first row is the header
-    const built: Row[] = parsed.map(([employeeCode, leaveTypeCode, total]) => {
-      let error: string | null = null;
-      if (!employeeCode || !leaveTypeCode || !total) error = 'Missing a value';
-      else if (!codeToProfile.has(employeeCode.toLowerCase())) error = `Unknown employee code "${employeeCode}"`;
-      else if (!validTypes.has(leaveTypeCode)) error = `Unknown leave type "${leaveTypeCode}"`;
-      else if (Number.isNaN(Number(total)) || Number(total) < 0) error = 'Total must be a positive number';
-      return { employeeCode, leaveTypeCode, total, error };
-    });
-    setRows(built);
-    setResults({});
-    setRosterLookup(codeToProfile);
+      const parsed = parseCsv(text).slice(1); // first row is the header
+      const built: Row[] = parsed.map(([employeeCode, leaveTypeCode, total]) => {
+        let error: string | null = null;
+        if (!employeeCode || !leaveTypeCode || !total) error = 'Missing a value';
+        else if (!codeToProfile.has(employeeCode.toLowerCase())) error = `Unknown employee code "${employeeCode}"`;
+        else if (!validTypes.has(leaveTypeCode)) error = `Unknown leave type "${leaveTypeCode}"`;
+        else if (Number.isNaN(Number(total)) || Number(total) < 0) error = 'Total must be a positive number';
+        const name = codeToProfile.get((employeeCode ?? '').toLowerCase())?.full_name ?? '';
+        return { employeeCode, name, leaveTypeCode, total, error };
+      });
+      setRows(built);
+      setResults({});
+      setRosterLookup(codeToProfile);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Could not read that file.');
+    }
   };
 
   const onUpload = async () => {
@@ -87,6 +95,12 @@ export function BulkLeaveBalances() {
         <input type="file" accept=".csv" onChange={onFile} style={{ display: 'none' }} />
       </label>
 
+      {loadError && (
+        <div className="card" style={{ padding: '10px 12px', marginBottom: 14, background: 'var(--status-absent-bg)', color: 'var(--status-absent-text)', fontSize: 13, boxShadow: 'none' }}>
+          {loadError}
+        </div>
+      )}
+
       {rows.length > 0 && (
         <>
           <div className="section-label" style={{ marginBottom: 10 }}>
@@ -97,7 +111,10 @@ export function BulkLeaveBalances() {
             return (
               <div key={i} className="card" style={{ padding: '10px 14px', marginBottom: 8, opacity: r.error ? 0.55 : 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>{r.employeeCode} · {r.leaveTypeCode} · {r.total}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{r.name || r.employeeCode}</div>
+                    <div style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>{r.employeeCode} · {r.leaveTypeCode} · {r.total}</div>
+                  </div>
                   {result && (
                     <span
                       className="tag"
