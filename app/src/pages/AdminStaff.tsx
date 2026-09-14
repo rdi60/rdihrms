@@ -89,26 +89,35 @@ export function AdminStaff() {
                 <span className="tag" style={{ background: 'var(--status-neutral-bg)', color: 'var(--status-neutral-text)' }}>Deactivated</span>
               )}
             </div>
-            {!isAdmin && (
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  className="btn btn-secondary"
-                  disabled={busyId === p.id}
-                  style={{ flex: 1, fontSize: 12, padding: '8px 10px' }}
-                  onClick={() => onToggleRole(p)}
-                >
-                  {p.role === 'manager' ? 'Make staff' : 'Make manager'}
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  disabled={busyId === p.id || isSelf}
-                  style={{ flex: 1, fontSize: 12, padding: '8px 10px', color: p.is_active ? 'var(--color-accent-700)' : undefined }}
-                  onClick={() => onToggleActive(p)}
-                >
-                  {p.is_active ? 'Deactivate' : 'Reactivate'}
-                </button>
-              </div>
-            )}
+            <div style={{ display: 'flex', gap: 8 }}>
+              {!isAdmin && (
+                <>
+                  <button
+                    className="btn btn-secondary"
+                    disabled={busyId === p.id}
+                    style={{ flex: 1, fontSize: 12, padding: '8px 10px' }}
+                    onClick={() => onToggleRole(p)}
+                  >
+                    {p.role === 'manager' ? 'Make staff' : 'Make manager'}
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    disabled={busyId === p.id || isSelf}
+                    style={{ flex: 1, fontSize: 12, padding: '8px 10px', color: p.is_active ? 'var(--color-accent-700)' : undefined }}
+                    onClick={() => onToggleActive(p)}
+                  >
+                    {p.is_active ? 'Deactivate' : 'Reactivate'}
+                  </button>
+                </>
+              )}
+              <button
+                className="btn btn-secondary"
+                style={{ flex: 1, fontSize: 12, padding: '8px 10px' }}
+                onClick={() => navigate(`/profile/staff/${p.id}/balances`)}
+              >
+                Balances
+              </button>
+            </div>
           </div>
         );
       })}

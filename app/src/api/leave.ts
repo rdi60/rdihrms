@@ -1,5 +1,11 @@
 import { supabase } from '../lib/supabase';
-import type { LeaveBalance, LeaveRequest, LeaveTypeCode, LeaveDuration } from '../types';
+import type { LeaveBalance, LeaveRequest, LeaveType, LeaveTypeCode, LeaveDuration } from '../types';
+
+export async function listLeaveTypes(): Promise<LeaveType[]> {
+  const { data, error } = await supabase.from('leave_types').select('*').order('code');
+  if (error) throw error;
+  return data ?? [];
+}
 
 export async function listLeaveBalances(profileId: string): Promise<LeaveBalance[]> {
   const year = new Date().getFullYear();
@@ -10,6 +16,21 @@ export async function listLeaveBalances(profileId: string): Promise<LeaveBalance
     .eq('year', year);
   if (error) throw error;
   return data ?? [];
+}
+
+export async function setLeaveBalanceTotal(
+  profileId: string,
+  leaveTypeCode: string,
+  total: number,
+  year = new Date().getFullYear()
+): Promise<void> {
+  const { error } = await supabase.rpc('set_leave_balance_total', {
+    p_profile_id: profileId,
+    p_leave_type_code: leaveTypeCode,
+    p_year: year,
+    p_total: total,
+  });
+  if (error) throw error;
 }
 
 export async function listMyLeaveRequests(profileId: string): Promise<LeaveRequest[]> {

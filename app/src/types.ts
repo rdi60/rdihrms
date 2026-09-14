@@ -32,7 +32,7 @@ export interface AttendanceDay {
   status: AttendanceStatus;
 }
 
-export type LeaveTypeCode = 'SL' | 'CL' | 'EL' | 'Permission';
+export type LeaveTypeCode = 'SL' | 'CL' | 'EL' | 'Permission' | 'RH' | 'CO' | 'OD';
 export type LeaveDuration = 'full' | 'half' | 'permission';
 export type LeaveStatus = 'pending' | 'approved' | 'rejected';
 
@@ -78,6 +78,20 @@ export interface Payslip {
   period_label: string;
   net_pay: number;
   file_path: string;
+}
+
+export type RegularizationStatus = 'pending' | 'approved' | 'rejected';
+
+export interface RegularizationRequest {
+  id: string;
+  profile_id: string;
+  work_date: string;
+  requested_clock_in: string | null;
+  requested_clock_out: string | null;
+  reason: string;
+  status: RegularizationStatus;
+  created_at: string;
+  profiles?: Pick<Profile, 'full_name'>;
 }
 
 export interface AppNotification {

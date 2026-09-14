@@ -17,6 +17,7 @@ import { Departments } from './pages/Departments';
 import { DepartmentDetail } from './pages/DepartmentDetail';
 import { AdminStaff } from './pages/AdminStaff';
 import { AddStaff } from './pages/AddStaff';
+import { StaffLeaveBalances } from './pages/StaffLeaveBalances';
 import { ChangePassword } from './pages/ChangePassword';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
@@ -85,6 +86,14 @@ export function App() {
           element={
             <AdminRoute>
               <AddStaff />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="profile/staff/:id/balances"
+          element={
+            <AdminRoute>
+              <StaffLeaveBalances />
             </AdminRoute>
           }
         />
