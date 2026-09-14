@@ -24,6 +24,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Older Windows/.NET Framework defaults to TLS 1.0/1.1, which Supabase's
+# HTTPS endpoint rejects, failing as "underlying connection was closed."
+# Force TLS 1.2 explicitly before any web request.
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
 $configPath = Join-Path $PSScriptRoot 'config.ps1'
 if (-not (Test-Path $configPath)) {
   Write-Error "config.ps1 not found next to this script. Copy config.example.ps1 to config.ps1 and fill in your values."
