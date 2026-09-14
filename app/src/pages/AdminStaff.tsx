@@ -60,6 +60,14 @@ export function AdminStaff() {
           <span style={{ fontSize: 16, display: 'flex' }}><PlusIcon /></span>New
         </button>
       </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <button className="btn btn-secondary" style={{ flex: 1, fontSize: 12, padding: '8px 10px' }} onClick={() => navigate('/profile/staff/bulk')}>
+          Bulk add staff
+        </button>
+        <button className="btn btn-secondary" style={{ flex: 1, fontSize: 12, padding: '8px 10px' }} onClick={() => navigate('/profile/leave-balances/bulk')}>
+          Bulk leave balances
+        </button>
+      </div>
       <div className="hr" style={{ margin: '16px 0 18px' }} />
 
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', marginBottom: 14, boxShadow: 'none', border: '1px solid var(--color-divider)' }}>
