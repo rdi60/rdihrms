@@ -56,8 +56,8 @@ export function Home() {
   const onToggleClock = async () => {
     setBusy(true);
     try {
-      if (clockedIn) await clockOut(profile.id);
-      else await clockIn(profile);
+      if (clockedIn) await clockOut();
+      else await clockIn();
       await load();
     } finally {
       setBusy(false);

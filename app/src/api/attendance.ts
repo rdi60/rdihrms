@@ -13,35 +13,19 @@ export async function getTodayAttendance(profileId: string): Promise<AttendanceD
   return data;
 }
 
-export async function clockIn(profile: Profile): Promise<AttendanceDay> {
-  const now = new Date();
-  const [h, m] = profile.shift_start.split(':').map(Number);
-  const shiftStart = new Date(now);
-  shiftStart.setHours(h, m + 10, 0, 0); // 10 min grace period
-  const status = now > shiftStart ? 'late' : 'present';
-
-  const { data, error } = await supabase
-    .from('attendance_days')
-    .upsert(
-      { profile_id: profile.id, work_date: todayStr(), clock_in: now.toISOString(), status },
-      { onConflict: 'profile_id,work_date' }
-    )
-    .select()
-    .single();
+// Both clock_in/clock_out are server-side RPCs: the timestamp and the
+// late/present status are computed from auth.uid() and now() in the
+// database, not trusted from the client.
+export async function clockIn(): Promise<AttendanceDay> {
+  const { data, error } = await supabase.rpc('clock_in').single();
   if (error) throw error;
-  return data;
+  return data as AttendanceDay;
 }
 
-export async function clockOut(profileId: string): Promise<AttendanceDay> {
-  const { data, error } = await supabase
-    .from('attendance_days')
-    .update({ clock_out: new Date().toISOString() })
-    .eq('profile_id', profileId)
-    .eq('work_date', todayStr())
-    .select()
-    .single();
+export async function clockOut(): Promise<AttendanceDay> {
+  const { data, error } = await supabase.rpc('clock_out').single();
   if (error) throw error;
-  return data;
+  return data as AttendanceDay;
 }
 
 export async function listMonthAttendance(
