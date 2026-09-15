@@ -196,13 +196,16 @@ export function Team() {
     setSelectedStatus(null);
   }, [period, anchor]);
 
-  // A manager assigned to no department is unscoped and sees everyone.
-  const scopedRoster = scopedDeptIds.length === 0
+  // Admins aren't assigned to a department and see everyone. A manager
+  // assigned to no department has no team yet, and should see nobody —
+  // not fall back to everyone.
+  const isUnscopedAdmin = profile?.role === 'admin' && scopedDeptIds.length === 0;
+  const scopedRoster = isUnscopedAdmin
     ? roster
     : roster.filter((r) => r.profile.department_id && scopedDeptIds.includes(r.profile.department_id));
   const scopedProfileIds = new Set(scopedRoster.map((r) => r.profile.id));
-  const scopedPeriodDays = scopedDeptIds.length === 0 ? periodDays : periodDays.filter((d) => scopedProfileIds.has(d.profile_id));
-  const scopedApprovedLeave = scopedDeptIds.length === 0
+  const scopedPeriodDays = isUnscopedAdmin ? periodDays : periodDays.filter((d) => scopedProfileIds.has(d.profile_id));
+  const scopedApprovedLeave = isUnscopedAdmin
     ? approvedLeave
     : approvedLeave.filter((l) => scopedProfileIds.has(l.profile_id));
 

@@ -32,7 +32,11 @@ export function MarkWeeklyOff() {
 
   if (!profile) return null;
 
-  const scopedRoster = (scopedDeptIds.length === 0
+  // Admins aren't assigned to a department and see everyone. A manager
+  // assigned to no department has no team yet, and should see nobody —
+  // not fall back to everyone.
+  const isUnscopedAdmin = profile.role === 'admin' && scopedDeptIds.length === 0;
+  const scopedRoster = (isUnscopedAdmin
     ? roster
     : roster.filter((p) => p.department_id && scopedDeptIds.includes(p.department_id))
   ).filter((p) => p.is_active);
