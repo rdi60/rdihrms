@@ -1,6 +1,6 @@
 {
-  "name": "Rajan Dental — Attendance",
-  "short_name": "Attendance",
+  "name": "Rajan Dental",
+  "short_name": "Rajan Dental",
   "description": "Staff attendance, leave, and team management for Rajan Dental.",
   "start_url": "/",
   "display": "standalone",
