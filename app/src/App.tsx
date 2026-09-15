@@ -27,16 +27,26 @@ import { PayrollReport } from './pages/PayrollReport';
 import { PunchReport } from './pages/PunchReport';
 import { MarkWeeklyOff } from './pages/MarkWeeklyOff';
 import { ChangePassword } from './pages/ChangePassword';
+import { AdminAccess } from './pages/AdminAccess';
+import type { AdminPermission } from './types';
 
 function ManagerRoute({ children }: { children: ReactElement }) {
   const { profile } = useAuth();
-  const allowed = profile?.role === 'manager' || profile?.role === 'admin';
+  const allowed = profile?.role === 'manager' || profile?.role === 'admin' || profile?.role === 'super_admin';
   return allowed ? children : <Navigate to="/" replace />;
 }
 
-function AdminRoute({ children }: { children: ReactElement }) {
+function AdminRoute({ children, require }: { children: ReactElement; require?: AdminPermission }) {
+  const { profile, hasAdminAccess } = useAuth();
+  if (profile?.role === 'super_admin') return children;
+  if (profile?.role !== 'admin') return <Navigate to="/" replace />;
+  if (require && !hasAdminAccess(require)) return <Navigate to="/" replace />;
+  return children;
+}
+
+function SuperAdminRoute({ children }: { children: ReactElement }) {
   const { profile } = useAuth();
-  return profile?.role === 'admin' ? children : <Navigate to="/" replace />;
+  return profile?.role === 'super_admin' ? children : <Navigate to="/" replace />;
 }
 
 export function App() {
@@ -76,7 +86,7 @@ export function App() {
         <Route
           path="profile/departments"
           element={
-            <AdminRoute>
+            <AdminRoute require="departments_holidays">
               <Departments />
             </AdminRoute>
           }
@@ -84,7 +94,7 @@ export function App() {
         <Route
           path="profile/departments/:id"
           element={
-            <AdminRoute>
+            <AdminRoute require="departments_holidays">
               <DepartmentDetail />
             </AdminRoute>
           }
@@ -92,7 +102,7 @@ export function App() {
         <Route
           path="profile/staff"
           element={
-            <AdminRoute>
+            <AdminRoute require="staff">
               <AdminStaff />
             </AdminRoute>
           }
@@ -100,7 +110,7 @@ export function App() {
         <Route
           path="profile/staff/new"
           element={
-            <AdminRoute>
+            <AdminRoute require="staff">
               <AddStaff />
             </AdminRoute>
           }
@@ -108,7 +118,7 @@ export function App() {
         <Route
           path="profile/staff/:id/balances"
           element={
-            <AdminRoute>
+            <AdminRoute require="leave_attendance">
               <StaffLeaveBalances />
             </AdminRoute>
           }
@@ -116,7 +126,7 @@ export function App() {
         <Route
           path="profile/staff/bulk"
           element={
-            <AdminRoute>
+            <AdminRoute require="staff">
               <BulkAddStaff />
             </AdminRoute>
           }
@@ -124,7 +134,7 @@ export function App() {
         <Route
           path="profile/leave-balances/bulk"
           element={
-            <AdminRoute>
+            <AdminRoute require="leave_attendance">
               <BulkLeaveBalances />
             </AdminRoute>
           }
@@ -132,7 +142,7 @@ export function App() {
         <Route
           path="profile/holidays/bulk"
           element={
-            <AdminRoute>
+            <AdminRoute require="departments_holidays">
               <BulkHolidays />
             </AdminRoute>
           }
@@ -140,7 +150,7 @@ export function App() {
         <Route
           path="profile/staff-dates/bulk"
           element={
-            <AdminRoute>
+            <AdminRoute require="staff">
               <BulkStaffDates />
             </AdminRoute>
           }
@@ -148,7 +158,7 @@ export function App() {
         <Route
           path="profile/staff-photos/bulk"
           element={
-            <AdminRoute>
+            <AdminRoute require="staff">
               <BulkStaffPhotos />
             </AdminRoute>
           }
@@ -156,7 +166,7 @@ export function App() {
         <Route
           path="profile/payroll-report"
           element={
-            <AdminRoute>
+            <AdminRoute require="payroll_reports">
               <PayrollReport />
             </AdminRoute>
           }
@@ -164,9 +174,17 @@ export function App() {
         <Route
           path="profile/punch-report"
           element={
-            <AdminRoute>
+            <AdminRoute require="payroll_reports">
               <PunchReport />
             </AdminRoute>
+          }
+        />
+        <Route
+          path="profile/admin-access"
+          element={
+            <SuperAdminRoute>
+              <AdminAccess />
+            </SuperAdminRoute>
           }
         />
         <Route path="profile/change-password" element={<ChangePassword />} />

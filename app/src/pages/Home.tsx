@@ -10,12 +10,14 @@ import { Avatar } from '../components/Avatar';
 import type { AttendanceDay } from '../types';
 
 function roleLabel(role: string) {
+  if (role === 'super_admin') return 'Super admin';
   if (role === 'admin') return 'Admin';
   if (role === 'manager') return 'Manager';
   return 'Staff';
 }
 
 function roleTag(role: string) {
+  if (role === 'super_admin') return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)' };
   if (role === 'admin') return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)' };
   if (role === 'manager') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)' };
   return null;

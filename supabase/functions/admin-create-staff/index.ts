@@ -49,11 +49,26 @@ Deno.serve(async (req) => {
   }
   const { data: callerProfile } = await admin
     .from('profiles')
-    .select('role')
+    .select('role, admin_full_access')
     .eq('id', callerData.user.id)
     .single();
-  if (callerProfile?.role !== 'admin') {
-    return json({ error: 'Only admins can create staff accounts' }, 403);
+
+  let canCreateStaff = callerProfile?.role === 'super_admin';
+  if (!canCreateStaff && callerProfile?.role === 'admin') {
+    if (callerProfile.admin_full_access) {
+      canCreateStaff = true;
+    } else {
+      const { data: perm } = await admin
+        .from('admin_permissions')
+        .select('permission')
+        .eq('profile_id', callerData.user.id)
+        .eq('permission', 'staff')
+        .maybeSingle();
+      canCreateStaff = !!perm;
+    }
+  }
+  if (!canCreateStaff) {
+    return json({ error: 'Only admins with staff management access can create staff accounts' }, 403);
   }
 
   let body: {

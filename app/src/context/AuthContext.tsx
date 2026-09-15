@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import type { Profile } from '../types';
+import type { AdminPermission, Profile } from '../types';
 
 interface AuthState {
   session: Session | null;
@@ -10,6 +10,7 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  hasAdminAccess: (permission: AdminPermission) => boolean;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -19,6 +20,7 @@ const DEACTIVATED_MESSAGE = 'This account has been deactivated. Contact your man
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [adminPermissions, setAdminPermissions] = useState<AdminPermission[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Loads the profile for a signed-in user; if their account has been
@@ -32,7 +34,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return DEACTIVATED_MESSAGE;
     }
     setProfile(data);
+    if (data?.role === 'admin' && !data.admin_full_access) {
+      const { data: perms } = await supabase.from('admin_permissions').select('permission').eq('profile_id', userId);
+      setAdminPermissions((perms ?? []).map((p) => p.permission as AdminPermission));
+    } else {
+      setAdminPermissions([]);
+    }
     return null;
+  };
+
+  const hasAdminAccess = (permission: AdminPermission) => {
+    if (!profile) return false;
+    if (profile.role === 'super_admin') return true;
+    if (profile.role !== 'admin') return false;
+    return profile.admin_full_access || adminPermissions.includes(permission);
   };
 
   useEffect(() => {
@@ -74,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, profile, loading, signIn, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ session, profile, loading, signIn, signOut, refreshProfile, hasAdminAccess }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,7 +12,7 @@ const TABS = [
 
 export function TabBar() {
   const { profile } = useAuth();
-  const isManager = profile?.role === 'manager' || profile?.role === 'admin';
+  const isManager = profile?.role === 'manager' || profile?.role === 'admin' || profile?.role === 'super_admin';
 
   return (
     <div className="tab-bar">

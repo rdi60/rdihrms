@@ -1,4 +1,5 @@
-export type Role = 'staff' | 'manager' | 'admin';
+export type Role = 'staff' | 'manager' | 'admin' | 'super_admin';
+export type AdminPermission = 'staff' | 'leave_attendance' | 'payroll_reports' | 'departments_holidays';
 
 export interface Profile {
   id: string;
@@ -14,6 +15,7 @@ export interface Profile {
   department_id: string | null;
   is_active: boolean;
   avatar_path: string | null;
+  admin_full_access: boolean;
 }
 
 export interface Department {

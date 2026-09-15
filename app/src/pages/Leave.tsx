@@ -31,7 +31,7 @@ function tagStyle(status: LeaveStatus | RegularizationStatus) {
 
 export function Leave() {
   const { profile } = useAuth();
-  const isManager = profile?.role === 'manager' || profile?.role === 'admin';
+  const isManager = profile?.role === 'manager' || profile?.role === 'admin' || profile?.role === 'super_admin';
   const [contentTab, setContentTab] = useState<'leave' | 'regularize'>('leave');
 
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);

@@ -8,6 +8,7 @@ import { Avatar } from '../components/Avatar';
 import type { Profile } from '../types';
 
 function roleTag(role: Profile['role']) {
+  if (role === 'super_admin') return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)', label: 'Super admin' };
   if (role === 'admin') return { bg: 'var(--status-leave-bg)', color: 'var(--status-leave-text)', label: 'Admin' };
   if (role === 'manager') return { bg: 'var(--status-late-bg)', color: 'var(--status-late-text)', label: 'Manager' };
   return { bg: 'var(--status-neutral-bg)', color: 'var(--status-neutral-text)', label: 'Staff' };
@@ -85,7 +86,7 @@ export function AdminStaff() {
       {filtered.map((p) => {
         const tag = roleTag(p.role);
         const isSelf = p.id === me?.id;
-        const isAdmin = p.role === 'admin';
+        const isAdmin = p.role === 'admin' || p.role === 'super_admin';
         return (
           <div key={p.id} className="card" style={{ padding: 14, marginBottom: 10, opacity: p.is_active ? 1 : 0.55 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>

@@ -5,6 +5,7 @@ import {
   BellIcon, LockIcon, GlobeIcon, HelpIcon, CalendarIcon, AwardIcon, GiftIcon, DownloadIcon,
   ChevronRightIcon, LogOutIcon, UsersIcon, UserIcon, ClockIcon,
 } from '../icons';
+import type { AdminPermission } from '../types';
 
 const CHANGE_PASSWORD_ITEM = { to: '/profile/change-password', label: 'Change password', Icon: LockIcon };
 
@@ -15,14 +16,14 @@ const COMPANY_ITEMS = [
   { to: '/profile/payslips', label: 'Payslips', Icon: DownloadIcon },
 ];
 
-const ADMIN_ITEMS = [
-  { to: '/profile/departments', label: 'Departments', Icon: UsersIcon },
-  { to: '/profile/staff', label: 'Staff', Icon: UsersIcon },
-  { to: '/profile/payroll-report', label: 'Payroll report', Icon: DownloadIcon },
-  { to: '/profile/punch-report', label: 'Punch report', Icon: ClockIcon },
-  { to: '/profile/holidays/bulk', label: 'Bulk upload holidays', Icon: CalendarIcon },
-  { to: '/profile/staff-dates/bulk', label: 'Bulk upload birthdays & anniversaries', Icon: GiftIcon },
-  { to: '/profile/staff-photos/bulk', label: 'Bulk upload staff photos', Icon: UserIcon },
+const ADMIN_ITEMS: { to: string; label: string; Icon: () => ReactElement; require: AdminPermission }[] = [
+  { to: '/profile/departments', label: 'Departments', Icon: UsersIcon, require: 'departments_holidays' },
+  { to: '/profile/staff', label: 'Staff', Icon: UsersIcon, require: 'staff' },
+  { to: '/profile/payroll-report', label: 'Payroll report', Icon: DownloadIcon, require: 'payroll_reports' },
+  { to: '/profile/punch-report', label: 'Punch report', Icon: ClockIcon, require: 'payroll_reports' },
+  { to: '/profile/holidays/bulk', label: 'Bulk upload holidays', Icon: CalendarIcon, require: 'departments_holidays' },
+  { to: '/profile/staff-dates/bulk', label: 'Bulk upload birthdays & anniversaries', Icon: GiftIcon, require: 'staff' },
+  { to: '/profile/staff-photos/bulk', label: 'Bulk upload staff photos', Icon: UserIcon, require: 'staff' },
 ];
 
 const SETTINGS_ITEMS = [
@@ -48,8 +49,11 @@ function RowLink({ to, label, Icon, last }: { to: string; label: string; Icon: (
 }
 
 export function Profile() {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, hasAdminAccess } = useAuth();
   if (!profile) return null;
+
+  const isSuperAdmin = profile.role === 'super_admin';
+  const visibleAdminItems = ADMIN_ITEMS.filter((item) => isSuperAdmin || hasAdminAccess(item.require));
 
   return (
     <>
@@ -66,13 +70,22 @@ export function Profile() {
         ))}
       </div>
 
-      {profile.role === 'admin' && (
+      {visibleAdminItems.length > 0 && (
         <>
           <div className="section-label" style={{ margin: '0 0 10px' }}>Admin</div>
           <div className="card" style={{ marginBottom: 22 }}>
-            {ADMIN_ITEMS.map(({ to, label, Icon }, i) => (
-              <RowLink key={to} to={to} label={label} Icon={Icon} last={i === ADMIN_ITEMS.length - 1} />
+            {visibleAdminItems.map(({ to, label, Icon }, i) => (
+              <RowLink key={to} to={to} label={label} Icon={Icon} last={i === visibleAdminItems.length - 1} />
             ))}
+          </div>
+        </>
+      )}
+
+      {isSuperAdmin && (
+        <>
+          <div className="section-label" style={{ margin: '0 0 10px' }}>Super admin</div>
+          <div className="card" style={{ marginBottom: 22 }}>
+            <RowLink to="/profile/admin-access" label="Admin access" Icon={LockIcon} last />
           </div>
         </>
       )}
